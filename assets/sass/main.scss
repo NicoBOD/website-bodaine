@@ -367,6 +367,86 @@
 		}
 	}
 
+/* Projets */
+
+	#projets {
+		@include vendor('animation', 'header #{_duration(header)} 2.75s forwards');
+		margin-top: 2.5em;
+		opacity: 0;
+
+		h2 {
+			font-size: 0.9em;
+			font-weight: 300;
+			letter-spacing: 0.2em;
+			margin-bottom: 1.25em;
+			opacity: 0.6;
+			text-transform: uppercase;
+		}
+
+		.cartes-projets {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 1em;
+			justify-content: center;
+			list-style: none;
+			margin: 0;
+			padding: 0;
+
+			li {
+				flex: 1 1 0;
+				margin: 0;
+				max-width: 13em;
+				min-width: 9em;
+				padding: 0;
+			}
+
+			a {
+				@include vendor('backdrop-filter', 'blur(6px)');
+				@include vendor('transition', 'background-color 0.25s ease-in-out, border-color 0.25s ease-in-out, transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out');
+				background: rgba(255,255,255,0.08);
+				border: solid 1px rgba(255,255,255,0.25);
+				border-radius: 0.5em;
+				color: _palette(fg);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				height: 100%;
+				padding: 1.25em 1em;
+				text-align: center;
+				text-decoration: none;
+
+				&:hover {
+					background: rgba(255,255,255,0.18);
+					border-color: #ffdd57;
+					box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+					@include vendor('transform', 'translateY(-4px)');
+
+					.icone {
+						color: #ffdd57;
+					}
+				}
+			}
+
+			.icone {
+				@include vendor('transition', 'color 0.25s ease-in-out');
+				font-size: 1.75em;
+				margin-bottom: 0.4em;
+			}
+
+			.titre {
+				font-weight: 900;
+				font-size: 1em;
+			}
+
+			.desc {
+				font-size: 0.8em;
+				line-height: 1.4em;
+				margin-top: 0.35em;
+				opacity: 0.7;
+			}
+		}
+	}
+
 /* Footer */
 
 	#footer {
@@ -457,6 +537,22 @@
 				}
 			}
 
+		/* Projets */
+
+			#projets {
+				margin-top: 2em;
+
+				.cartes-projets {
+					align-items: center;
+					flex-direction: column;
+
+					li {
+						max-width: 18em;
+						width: 100%;
+					}
+				}
+			}
+
 	}
 
 /* Mobile (Portrait) */
@@ -472,6 +568,26 @@
 			#header {
 				nav {
 					padding: 0 1em;
+				}
+			}
+
+		/* Projets */
+
+			#projets {
+				margin-top: 1.5em;
+
+				h2 {
+					margin-bottom: 0.85em;
+				}
+
+				.cartes-projets {
+					a {
+						padding: 0.85em 1em;
+					}
+
+					.desc {
+						display: none;
+					}
 				}
 			}
 
