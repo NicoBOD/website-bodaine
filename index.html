@@ -492,37 +492,76 @@ document.addEventListener("DOMContentLoaded", function() {
 
     window.addEventListener('mousemove', deplacerBouton);
 
+    // ----- Confettis : explosion depuis le bouton, puis pluie de papillons -----
+    // Chaque confetti est composé de deux éléments : l'extérieur gère la trajectoire
+    // (éclat puis chute, via des variables CSS), l'intérieur gère le papillonnement
+    // 3D qui donne l'illusion d'un vrai bout de papier qui virevolte.
+    const couleursConfettis = ['#f2a65a', '#ffc98b', '#ffd166', '#6bd5e1', '#5aa9d6', '#ef6f6c', '#9bf6af', '#f5f7fa'];
+    // Un confetti sur dix est un cookie : c'est quand même lui le héros de la blague
+    const formesConfettis = ['carre', 'carre', 'rectangle', 'rectangle', 'rond', 'rond', 'serpentin', 'serpentin', 'carre', 'cookie'];
+
+    function creerConfetti(xDepart, yDepart, eclatX, eclatY) {
+        if (reduireAnimations) return;
+        // Garde-fou : on plafonne le nombre de confettis simultanés
+        if (confettiContainer.childElementCount > 220) return;
+
+        const exterieur = document.createElement('span');
+        const interieur = document.createElement('span');
+        exterieur.className = 'confetti ' + formesConfettis[Math.floor(Math.random() * formesConfettis.length)];
+        interieur.className = 'confetti-interieur';
+
+        // Trajectoire : position de départ, poussée de l'éclat, dérive pendant la chute
+        const derive = (eclatX || 0) + (Math.random() * 240 - 120);
+        exterieur.style.setProperty('--x0', xDepart.toFixed(0) + 'px');
+        exterieur.style.setProperty('--y0', yDepart.toFixed(0) + 'px');
+        exterieur.style.setProperty('--bx', (eclatX || 0).toFixed(0) + 'px');
+        exterieur.style.setProperty('--by', (eclatY || 0).toFixed(0) + 'px');
+        exterieur.style.setProperty('--dx', derive.toFixed(0) + 'px');
+        exterieur.style.animationDuration = (3 + Math.random() * 3).toFixed(2) + 's';
+
+        // Apparence : taille, couleur et axe de rotation propres à chaque confetti
+        const taille = 6 + Math.random() * 7;
+        if (exterieur.classList.contains('cookie')) {
+            interieur.textContent = '🍪';
+            interieur.style.fontSize = (10 + Math.random() * 8).toFixed(0) + 'px';
+            interieur.style.lineHeight = '1';
+        } else if (exterieur.classList.contains('rectangle')) {
+            interieur.style.width = taille + 'px';
+            interieur.style.height = (taille * 0.45).toFixed(1) + 'px';
+        } else if (exterieur.classList.contains('serpentin')) {
+            interieur.style.width = '4px';
+            interieur.style.height = (14 + Math.random() * 10).toFixed(0) + 'px';
+        } else {
+            interieur.style.width = taille + 'px';
+            interieur.style.height = taille + 'px';
+        }
+        if (!exterieur.classList.contains('cookie')) {
+            interieur.style.backgroundColor = couleursConfettis[Math.floor(Math.random() * couleursConfettis.length)];
+        }
+        interieur.style.setProperty('--ax', (0.4 + Math.random() * 0.6).toFixed(2));
+        interieur.style.setProperty('--ay', Math.random().toFixed(2));
+        interieur.style.animationDuration = (0.55 + Math.random() * 0.9).toFixed(2) + 's';
+
+        exterieur.appendChild(interieur);
+        confettiContainer.appendChild(exterieur);
+
+        // Nettoyage une fois la chute terminée
+        setTimeout(function() { exterieur.remove(); }, 6500);
+    }
+
+    // Pluie : un confetti qui part du haut de l'écran (utilisée aussi par le code Konami)
     function createConfetti() {
-        const confetti = document.createElement('div');
-        confetti.classList.add('confetti');
+        creerConfetti(Math.random() * window.innerWidth, -20, 0, 0);
+    }
 
-        const size = Math.random() * 10 + 5;
-        const color = `hsl(${Math.floor(Math.random() * 360)}, 100%, 50%)`;
-
-        confetti.style.width = `${size}px`;
-        confetti.style.height = `${size}px`;
-        confetti.style.backgroundColor = color;
-
-        const startX = Math.random() * window.innerWidth;
-        confetti.style.position = 'absolute';
-        confetti.style.left = `${startX}px`;
-        confetti.style.top = `-10px`;
-
-        confettiContainer.appendChild(confetti);
-
-        const endX = startX + (Math.random() * 200 - 100);
-        const duration = Math.random() * 3 + 3;
-
-        confetti.style.transition = `transform ${duration}s linear, opacity ${duration}s ease-out`;
-        confetti.style.transform = `translate(${endX - startX}px, ${window.innerHeight + 20}px)`;
-
-        setTimeout(() => {
-            confetti.style.opacity = '0';
-        }, duration * 900);
-
-        setTimeout(() => {
-            confetti.remove();
-        }, duration * 1000);
+    // Explosion : une gerbe radiale depuis un point (le bouton à cookies, par exemple)
+    function explosionConfettis(x, y, nombre) {
+        for (let i = 0; i < nombre; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const force = 60 + Math.random() * 170;
+            // Légère poussée vers le haut pour un vrai effet « canon à confettis »
+            creerConfetti(x, y, Math.cos(angle) * force, Math.sin(angle) * force * 0.7 - 90);
+        }
     }
 
 
@@ -563,10 +602,9 @@ document.addEventListener("DOMContentLoaded", function() {
             boutonFuyant.classList.remove('bounce');
         }, 600);
 
-        // Lance l'effet de confettis à chaque clic
-        for (let i = 0; i < 50; i++) {
-            setTimeout(createConfetti, Math.random() * 500);
-        }
+        // Chaque clic fait exploser une gerbe de confettis depuis le bouton lui-même
+        const rectBouton = boutonFuyant.getBoundingClientRect();
+        explosionConfettis(rectBouton.left + rectBouton.width / 2, rectBouton.top + rectBouton.height / 2, 50);
 
         // Met à jour le texte du bouton avec le nouveau compteur
         if (clickCount > 1) {
@@ -583,14 +621,15 @@ document.addEventListener("DOMContentLoaded", function() {
                 afficherMenuSecret(); // Appeler la fonction pour afficher le menu secret
             }, 500);
 
-            // Commence à faire tomber les confettis pendant que le menu apparaît
+            // Grand final : une pluie dense de confettis pendant que le menu apparaît
             confettiInterval = setInterval(() => {
                 createConfetti();
-            }, 100);
+                createConfetti();
+            }, 90);
 
             setTimeout(() => {
                 stopConfetti();
-            }, 4000);
+            }, 4500);
         }
     });
 	
@@ -619,17 +658,10 @@ document.addEventListener("DOMContentLoaded", function() {
         menuContent.style.maxHeight = ouvert ? menuContent.scrollHeight + 'px' : '0';
     });
 
-    // Fonction pour arrêter les confettis
+    // Arrête la pluie : les confettis déjà lancés finissent leur chute naturellement
+    // (leur animation gère elle-même le fondu de fin et chacun se retire du DOM)
     function stopConfetti() {
         clearInterval(confettiInterval);
-        const allConfetti = document.querySelectorAll('.confetti');
-        allConfetti.forEach(confetti => {
-            confetti.style.transition = "opacity 2s ease-out";
-            confetti.style.opacity = 0;
-            setTimeout(() => {
-                confetti.remove();
-            }, 2000);
-        });
     }
 
     // ----- Easter egg : code Konami (↑ ↑ ↓ ↓ ← → ← → B A) -----
