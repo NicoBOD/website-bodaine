@@ -29,6 +29,38 @@
 		<meta property="og:image" content="https://bodaine.fr/assets/images/logo.jpg"> <!-- URL absolue requise pour le partage sur les réseaux sociaux -->
 		<meta name="robots" content="index, follow">
 
+		<!-- Données structurées schema.org (JSON-LD) pour améliorer la fiche dans les moteurs de recherche -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@graph": [
+				{
+					"@type": "Person",
+					"@id": "https://bodaine.fr/#nicolas-bodaine",
+					"name": "Nicolas Bodaine",
+					"url": "https://bodaine.fr",
+					"image": "https://bodaine.fr/assets/images/logo.jpg",
+					"jobTitle": "Formateur IT freelance",
+					"description": "Formateur IT freelance spécialisé en systèmes, réseaux, cloud et cybersécurité.",
+					"knowsAbout": ["Systèmes", "Réseaux", "Cloud", "Cybersécurité", "Formation professionnelle"],
+					"sameAs": [
+						"https://www.linkedin.com/in/bodaine/",
+						"https://github.com/NicoBOD"
+					],
+					"memberOf": { "@id": "https://www.tutotech.org/#organisation" }
+				},
+				{
+					"@type": "Organization",
+					"@id": "https://www.tutotech.org/#organisation",
+					"name": "TutoTech",
+					"url": "https://www.tutotech.org",
+					"description": "Association dédiée à l'accessibilité numérique pour tous, en particulier pour les personnes en difficulté ou isolées.",
+					"sameAs": ["https://github.com/TutoTech"]
+				}
+			]
+		}
+		</script>
+
 
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<!-- Lien vers la feuille de style CSS principale (main.css) qui se trouve dans le dossier 'assets/css' -->
@@ -215,6 +247,19 @@
 		</main>
 		<!-- Fermeture de la balise <main> -->
 <div id="confetti-container"></div>
+
+		<!-- Mini-jeu caché : quiz réseau (tapez « quiz » ou faites deux fois le code Konami) -->
+		<div id="quiz-overlay" aria-hidden="true">
+			<div id="quiz-panneau" role="dialog" aria-modal="true" aria-labelledby="quiz-titre">
+				<button id="quiz-fermer" aria-label="Fermer le quiz">&times;</button>
+				<h2 id="quiz-titre"><i class="fas fa-network-wired" aria-hidden="true"></i> Quiz réseau</h2>
+				<p id="quiz-progression"></p>
+				<p id="quiz-question"></p>
+				<div id="quiz-reponses"></div>
+				<p id="quiz-feedback"></p>
+				<button id="quiz-suivant">Question suivante</button>
+			</div>
+		</div>
 
 		<script>
 			<!-- Insertion d'un script JavaScript -->
@@ -529,8 +574,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ----- Easter egg : code Konami (↑ ↑ ↓ ↓ ← → ← → B A) -----
+    // Une fois : mode fête. Deux fois en moins de 30 secondes : quiz réseau !
     const codeKonami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
     let positionKonami = 0;
+    let dernierKonami = 0;
 
     document.addEventListener('keydown', function(event) {
         const touche = event.key.length === 1 ? event.key.toLowerCase() : event.key;
@@ -538,7 +585,14 @@ document.addEventListener("DOMContentLoaded", function() {
             positionKonami++;
             if (positionKonami === codeKonami.length) {
                 positionKonami = 0;
-                modeFete();
+                const maintenant = Date.now();
+                if (maintenant - dernierKonami < 30000) {
+                    dernierKonami = 0;
+                    ouvrirQuiz();
+                } else {
+                    dernierKonami = maintenant;
+                    modeFete();
+                }
             }
         } else {
             positionKonami = (touche === codeKonami[0]) ? 1 : 0;
@@ -552,8 +606,173 @@ document.addEventListener("DOMContentLoaded", function() {
         for (let i = 0; i < 200; i++) {
             setTimeout(createConfetti, Math.random() * 2500);
         }
-        afficherToast('🎮 Code Konami détecté : mode fête activé !');
+        afficherToast('🎮 Code Konami ! Refaites-le dans les 30 s pour un quiz réseau 🧠');
         setTimeout(function() { nom.classList.remove('arc-en-ciel'); }, 8000);
+    }
+
+    // ----- Easter eggs au clavier : tapez « quiz » ou « matrix » -----
+    let tamponClavier = '';
+    document.addEventListener('keydown', function(event) {
+        if (event.key.length !== 1) return;
+        tamponClavier = (tamponClavier + event.key.toLowerCase()).slice(-10);
+        if (tamponClavier.endsWith('quiz')) {
+            tamponClavier = '';
+            ouvrirQuiz();
+        } else if (tamponClavier.endsWith('matrix')) {
+            tamponClavier = '';
+            basculerModeCRT();
+        }
+    });
+
+    // La touche Échap ferme le quiz, sinon quitte le mode terminal rétro
+    document.addEventListener('keydown', function(event) {
+        if (event.key !== 'Escape') return;
+        if (quizOverlay.classList.contains('visible')) {
+            fermerQuiz();
+        } else if (document.body.classList.contains('crt')) {
+            basculerModeCRT();
+        }
+    });
+
+    // ----- Mode terminal rétro (CRT vert phosphore), déclenché par « matrix » -----
+    function basculerModeCRT() {
+        const actif = document.body.classList.toggle('crt');
+        afficherToast(actif
+            ? '📟 Mode terminal rétro activé — retapez « matrix » (ou Échap) pour quitter'
+            : '🌈 Retour en couleurs !');
+    }
+
+    // ----- Mini-jeu caché : quiz réseau -----
+    const questionsQuiz = [
+        { q: 'Quel port utilise SSH par défaut ?', r: ['21', '22', '443', '3389'], bonne: 1 },
+        { q: 'Que signifie « DHCP » ?', r: ['Dynamic Host Configuration Protocol', 'Direct Host Control Protocol', 'Dual Hardware Channel Process', 'Distributed Hypertext Cache Protocol'], bonne: 0 },
+        { q: 'Combien d\'adresses IP utilisables dans un /29 ?', r: ['4', '6', '8', '14'], bonne: 1 },
+        { q: 'Quel protocole traduit les noms de domaine en adresses IP ?', r: ['DHCP', 'NAT', 'DNS', 'ARP'], bonne: 2 },
+        { q: 'Quelle commande Linux affiche les adresses IP de la machine ?', r: ['ipconfig', 'ip a', 'showip', 'netcfg'], bonne: 1 },
+        { q: 'À quelle couche du modèle OSI opère le routage ?', r: ['Couche 2 — Liaison', 'Couche 3 — Réseau', 'Couche 4 — Transport', 'Couche 7 — Application'], bonne: 1 },
+        { q: 'Quel niveau de RAID duplique les données en miroir ?', r: ['RAID 0', 'RAID 1', 'RAID 5', 'RAID 10'], bonne: 1 },
+        { q: 'Quelle est l\'adresse de broadcast du réseau 192.168.1.0/24 ?', r: ['192.168.1.0', '192.168.1.1', '192.168.1.254', '192.168.1.255'], bonne: 3 }
+    ];
+
+    const quizOverlay = document.getElementById('quiz-overlay');
+    const quizProgression = document.getElementById('quiz-progression');
+    const quizQuestion = document.getElementById('quiz-question');
+    const quizReponses = document.getElementById('quiz-reponses');
+    const quizFeedback = document.getElementById('quiz-feedback');
+    const quizSuivant = document.getElementById('quiz-suivant');
+    let indexQuestion = 0;
+    let scoreQuiz = 0;
+
+    function ouvrirQuiz() {
+        indexQuestion = 0;
+        scoreQuiz = 0;
+        quizOverlay.classList.add('visible');
+        quizOverlay.setAttribute('aria-hidden', 'false');
+        afficherQuestion();
+    }
+
+    function fermerQuiz() {
+        quizOverlay.classList.remove('visible');
+        quizOverlay.setAttribute('aria-hidden', 'true');
+    }
+
+    function afficherQuestion() {
+        const q = questionsQuiz[indexQuestion];
+        quizProgression.textContent = 'Question ' + (indexQuestion + 1) + ' / ' + questionsQuiz.length + ' — Score : ' + scoreQuiz;
+        quizQuestion.textContent = q.q;
+        quizFeedback.textContent = '';
+        quizSuivant.style.display = 'none';
+        quizReponses.innerHTML = '';
+        q.r.forEach(function(reponse, i) {
+            const bouton = document.createElement('button');
+            bouton.className = 'quiz-reponse';
+            bouton.textContent = reponse;
+            bouton.addEventListener('click', function() { validerReponse(i, bouton); });
+            quizReponses.appendChild(bouton);
+        });
+    }
+
+    function validerReponse(choix, bouton) {
+        const q = questionsQuiz[indexQuestion];
+        // Désactive tout et met en évidence la bonne réponse
+        quizReponses.querySelectorAll('button').forEach(function(b, i) {
+            b.disabled = true;
+            if (i === q.bonne) b.classList.add('correcte');
+        });
+        if (choix === q.bonne) {
+            scoreQuiz++;
+            quizFeedback.textContent = '✅ Bonne réponse !';
+        } else {
+            bouton.classList.add('fausse');
+            quizFeedback.textContent = '❌ Raté ! La bonne réponse est en vert.';
+        }
+        quizProgression.textContent = 'Question ' + (indexQuestion + 1) + ' / ' + questionsQuiz.length + ' — Score : ' + scoreQuiz;
+        quizSuivant.textContent = (indexQuestion + 1 < questionsQuiz.length) ? 'Question suivante' : 'Voir mon score';
+        quizSuivant.style.display = 'inline-block';
+    }
+
+    function afficherResultatQuiz() {
+        quizProgression.textContent = '';
+        quizQuestion.textContent = 'Score final : ' + scoreQuiz + ' / ' + questionsQuiz.length;
+        quizReponses.innerHTML = '';
+        let message;
+        if (scoreQuiz === questionsQuiz.length) message = '🏆 Sans faute — un vrai pro des réseaux !';
+        else if (scoreQuiz >= 6) message = '💪 Très solide ! Encore un petit effort pour le sans-faute.';
+        else if (scoreQuiz >= 4) message = '🙂 Pas mal ! Un tour sur le Wiki Tech et ce sera parfait.';
+        else message = '📚 Ça se travaille… AdminGo est fait pour ça !';
+        quizFeedback.textContent = message;
+        quizSuivant.textContent = 'Rejouer';
+        quizSuivant.style.display = 'inline-block';
+    }
+
+    quizSuivant.addEventListener('click', function() {
+        if (indexQuestion >= questionsQuiz.length) {
+            // Écran de résultat → « Rejouer »
+            ouvrirQuiz();
+            return;
+        }
+        indexQuestion++;
+        if (indexQuestion < questionsQuiz.length) {
+            afficherQuestion();
+        } else {
+            afficherResultatQuiz();
+        }
+    });
+
+    document.getElementById('quiz-fermer').addEventListener('click', fermerQuiz);
+
+    // Un clic sur le fond assombri ferme aussi le quiz
+    quizOverlay.addEventListener('click', function(event) {
+        if (event.target === quizOverlay) fermerQuiz();
+    });
+
+    // ----- Effet saisonnier : neige en hiver, feuilles en automne, pétales au printemps -----
+    // (testable toute l'année via ?saison=hiver, ?saison=automne ou ?saison=printemps)
+    const saisonForcee = new URLSearchParams(window.location.search).get('saison');
+    const mois = new Date().getMonth() + 1;
+    let saison = saisonForcee;
+    if (!saison) {
+        if (mois === 12 || mois <= 2) saison = 'hiver';
+        else if (mois >= 9 && mois <= 11) saison = 'automne';
+        else if (mois >= 3 && mois <= 4) saison = 'printemps';
+        // de mai à août : pas d'effet
+    }
+    const symbolesSaison = { hiver: ['❄', '❅', '❆'], automne: ['🍂', '🍁'], printemps: ['🌸', '🌺'] }[saison];
+
+    if (symbolesSaison && !reduireAnimations) {
+        setInterval(function() {
+            // Limite le nombre de particules simultanées pour rester léger
+            if (document.querySelectorAll('.particule-saison').length >= 25) return;
+            const p = document.createElement('span');
+            p.className = 'particule-saison' + (Math.random() < 0.5 ? ' derive-gauche' : '');
+            p.textContent = symbolesSaison[Math.floor(Math.random() * symbolesSaison.length)];
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.fontSize = (0.6 + Math.random() * 1.1) + 'em';
+            p.style.opacity = 0.4 + Math.random() * 0.6;
+            p.style.animationDuration = (7 + Math.random() * 8) + 's';
+            document.body.appendChild(p);
+            setTimeout(function() { p.remove(); }, 16000);
+        }, 800);
     }
 
     // Petit message temporaire en bas de l'écran
@@ -572,7 +791,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // ----- Easter egg : message pour les curieux qui ouvrent la console -----
 console.log(
-    '%c👋 Salut, curieux·se !%c\n\nPuisque tu es là, tu mérites un indice : essaie le code Konami sur cette page…\n↑ ↑ ↓ ↓ ← → ← → B A\n\n— Nicolas',
+    '%c👋 Salut, curieux·se !%c\n\nPuisque tu es là, tu mérites quelques indices :\n• Essaie le code Konami… ↑ ↑ ↓ ↓ ← → ← → B A (deux fois pour une surprise de plus 🧠)\n• Tape « quiz » pour tester tes connaissances réseau\n• Tape « matrix » pour voyager dans le temps 📟\n\n— Nicolas',
     'font-size: 1.5em; font-weight: bold; color: #f2a65a;',
     'font-size: 1em; color: inherit;'
 );

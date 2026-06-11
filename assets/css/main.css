@@ -1771,3 +1771,216 @@ body.dark #bg {
     }
 }
 
+
+/* ---- Mini-jeu caché : quiz réseau ---- */
+
+#quiz-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(5, 12, 18, 0.6);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1em;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+#quiz-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+#quiz-panneau {
+    position: relative;
+    width: min(30em, 100%);
+    max-height: calc(100vh - 2em);
+    overflow-y: auto;
+    background: var(--panneau);
+    border: 1px solid var(--panneau-bord);
+    border-radius: 0.75em;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    padding: 1.5em;
+    color: var(--texte-clair);
+    text-align: center;
+    transform: scale(0.92);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#quiz-overlay.visible #quiz-panneau {
+    transform: none;
+}
+
+#quiz-titre {
+    font-size: 1.1em;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin: 0 0 0.75em;
+}
+
+#quiz-progression {
+    font-size: 0.8em;
+    opacity: 0.7;
+    margin: 0 0 1em;
+}
+
+#quiz-question {
+    font-size: 1em;
+    font-weight: bold;
+    margin: 0 0 1em;
+}
+
+#quiz-reponses {
+    display: grid;
+    gap: 0.5em;
+}
+
+.quiz-reponse {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--panneau-bord);
+    border-radius: 0.5em;
+    color: var(--texte-clair);
+    padding: 0.65em 1em;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-family: inherit;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.quiz-reponse:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: var(--accent-clair);
+    transform: translateY(-2px);
+}
+
+.quiz-reponse:disabled {
+    cursor: default;
+}
+
+.quiz-reponse.correcte {
+    background: rgba(46, 160, 67, 0.35);
+    border-color: #2ea043;
+}
+
+.quiz-reponse.fausse {
+    background: rgba(218, 54, 51, 0.35);
+    border-color: #da3633;
+}
+
+#quiz-feedback {
+    min-height: 1.4em;
+    margin: 1em 0 0.5em;
+    font-size: 0.9em;
+}
+
+#quiz-suivant {
+    display: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-fonce));
+    color: #fff;
+    border: none;
+    border-radius: 2em;
+    padding: 0.6em 1.5em;
+    font-weight: bold;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: filter 0.25s ease;
+}
+
+#quiz-suivant:hover {
+    filter: brightness(1.12);
+}
+
+#quiz-fermer {
+    position: absolute;
+    top: 0.4em;
+    right: 0.55em;
+    background: none;
+    border: none;
+    color: var(--texte-clair);
+    font-size: 1.5em;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#quiz-fermer:hover {
+    opacity: 1;
+    transform: scale(1.15);
+}
+
+/* ---- Mode terminal rétro CRT (easter egg « matrix ») ---- */
+
+/* Toute la scène vire au vert phosphore */
+body.crt #wrapper {
+    filter: grayscale(1) sepia(1) hue-rotate(65deg) saturate(4) brightness(0.85) contrast(1.1);
+}
+
+body.crt {
+    font-family: "Courier New", Courier, monospace;
+}
+
+/* Lignes de balayage + léger scintillement par-dessus tout */
+body.crt::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 100000;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.22) 0px,
+        rgba(0, 0, 0, 0.22) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    animation: scintillement 0.15s steps(2) infinite;
+}
+
+@keyframes scintillement {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.9; }
+}
+
+/* ---- Particules saisonnières (neige, feuilles, pétales) ---- */
+
+.particule-saison {
+    position: fixed;
+    top: -2em;
+    z-index: 50;
+    pointer-events: none;
+    /* Ombre douce pour rester visible sur le ciel clair (flocons blancs notamment) */
+    text-shadow: 0 1px 4px rgba(13, 27, 38, 0.45);
+    animation-name: chute-saison;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+.particule-saison.derive-gauche {
+    animation-name: chute-saison-gauche;
+}
+
+@keyframes chute-saison {
+    to {
+        transform: translateY(110vh) translateX(5em) rotate(320deg);
+    }
+}
+
+@keyframes chute-saison-gauche {
+    to {
+        transform: translateY(110vh) translateX(-5em) rotate(-320deg);
+    }
+}
