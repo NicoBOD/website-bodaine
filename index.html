@@ -16,8 +16,8 @@
 		<meta charset="utf-8" />
 		<!-- Définit l'encodage des caractères à UTF-8, ce qui permet d'afficher correctement les caractères spéciaux et les accents -->
 
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<!-- Rend la page web responsive (adaptable à tous les appareils), empêche le zoom automatique avec 'user-scalable=no' -->
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!-- Rend la page web responsive (adaptable à tous les appareils) ; le zoom reste autorisé pour l'accessibilité -->
 
 		<!-- Ajout de balises meta pour une meilleure optimisation SEO et les réseaux sociaux -->
 		<meta name="description" content="Nicolas Bodaine, formateur IT freelance spécialisé en systèmes, réseaux, cloud et cybersécurité.">
@@ -26,7 +26,7 @@
 		<meta property="og:title" content="Site web de Nicolas Bodaine">
 		<meta property="og:description" content="Formateur IT & Freelance spécialisé en systèmes, réseaux, cloud, et cybersécurité.">
 		<meta property="og:url" content="https://bodaine.fr">
-		<meta property="og:image" content="assets/images/logo.jpg"> <!-- Mettre une image de profil ou logo -->
+		<meta property="og:image" content="https://bodaine.fr/assets/images/logo.jpg"> <!-- URL absolue requise pour le partage sur les réseaux sociaux -->
 		<meta name="robots" content="index, follow">
 
 
@@ -71,6 +71,11 @@
 			
 			
 			
+			<!-- Bouton de bascule entre mode clair et mode sombre (préférence mémorisée) -->
+			<button id="themeToggle" aria-label="Activer le mode sombre" title="Mode sombre / clair">
+				<i class="fas fa-moon" aria-hidden="true"></i>
+			</button>
+
 			<button id="boutonFuyant">
     <span id="ligne1">clic = surprise !</span><br>
     <span id="ligne2">REFUSER LES COOKIES 😂</span>
@@ -132,6 +137,13 @@
 									<span class="desc">Appli de prépa aux examens TSSR &amp; AIS</span>
 								</a>
 							</li>
+							<li>
+								<a href="https://pedagogia.bodaine.fr/" target="_blank" rel="noopener noreferrer">
+									<span class="icone"><i class="fas fa-magic" aria-hidden="true"></i></span>
+									<span class="titre">PedagogIA</span>
+									<span class="desc">Génération de contenu pédagogique par IA</span>
+								</a>
+							</li>
 						</ul>
 					</section>
 					<!-- Fin de la section des projets -->
@@ -148,27 +160,31 @@
 			</div>
 		  
 
-			<!-- Conteneur du menu secret, caché par défaut -->
-<div id="menu-secret" style="display: none; position: fixed; top: 10px; right: 10px; background-color: white; border: 1px solid #ccc; padding: 10px; z-index: 1000;">
-    <button id="menuButton" style="background-color: #333; color: #fff; border: none; cursor: pointer;">Menu secret</button>
-    <ul id="menuContent" style="display: none; list-style-type: none; margin: 0; padding: 0;">
+			<!-- Conteneur du menu secret, invisible tant que l'easter egg n'est pas déclenché -->
+<div id="menu-secret" aria-hidden="true">
+    <button id="menuButton" aria-expanded="false" aria-controls="menuContent">
+        <i class="fas fa-gift" aria-hidden="true"></i>
+        <span class="libelle">Menu secret</span>
+        <i class="fas fa-chevron-down chevron" aria-hidden="true"></i>
+    </button>
+    <ul id="menuContent">
         <!-- Entrée pour Mon CV en ligne -->
-        <li><a href="https://europa.eu/europass/eportfolio/api/eprofile/shared-profile/nicolas-bodaine/2b0724cd-7c31-4274-b8c0-b55db4aae794?view=html" target="_blank" style="text-decoration: none; color: #333; display: block; padding: 5px;">Mon CV en ligne</a></li>
-
-        <!-- Nouvelle entrée : Louer des services cloud éthiques-->
-        <li><a href="#" style="text-decoration: none; color: #333; display: block; padding: 5px; font-weight: bold;">Louer des services cloud éthiques (⬇️ liens affiliés ⬇️️)</a></li>
-            <ul>
-              <!-- Sous-menu pour kDrive -->
-              <li><a href="https://www.infomaniak.com/fr/kdrive/?utm_term=67000289b112c">Espace de stockage sûr en Suisse</a></li>
-              <!-- Sous-menu pour WordPress -->
-              <li><a href="https://www.infomaniak.com/goto/fr/my-easy-site?utm_term=67000289b112c">Site internet facile sans coder</a></li>
-              <!-- Sous-menu pour Serveur Cloud -->
-              <li><a href="https://www.infomaniak.com/goto/fr/hosting.managed-cloud?utm_term=67000289b112c">Machine virtuelle dans le cloud</a></li>
-              <!-- Sous-menu pour IaaS -->
-              <li><a href="https://www.infomaniak.com/fr/hebergement/public-cloud?utm_term=67000289b112c">IaaS OpenStack pour les pros</a></li>
-            </ul>
+        <li>
+            <a href="https://europa.eu/europass/eportfolio/api/eprofile/shared-profile/nicolas-bodaine/2b0724cd-7c31-4274-b8c0-b55db4aae794?view=html" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-id-card" aria-hidden="true"></i> Mon CV en ligne
+            </a>
         </li>
 
+        <!-- Groupe : services cloud éthiques (liens affiliés Infomaniak) -->
+        <li class="groupe">
+            <span class="titre-groupe"><i class="fas fa-cloud" aria-hidden="true"></i> Services cloud éthiques <small>(liens affiliés)</small></span>
+            <ul class="sous-menu">
+                <li><a href="https://www.infomaniak.com/fr/kdrive/?utm_term=67000289b112c" target="_blank" rel="noopener noreferrer">Espace de stockage sûr en Suisse</a></li>
+                <li><a href="https://www.infomaniak.com/goto/fr/my-easy-site?utm_term=67000289b112c" target="_blank" rel="noopener noreferrer">Site internet facile sans coder</a></li>
+                <li><a href="https://www.infomaniak.com/goto/fr/hosting.managed-cloud?utm_term=67000289b112c" target="_blank" rel="noopener noreferrer">Machine virtuelle dans le cloud</a></li>
+                <li><a href="https://www.infomaniak.com/fr/hebergement/public-cloud?utm_term=67000289b112c" target="_blank" rel="noopener noreferrer">IaaS OpenStack pour les pros</a></li>
+            </ul>
+        </li>
     </ul>
 </div>
 
@@ -219,8 +235,29 @@ document.addEventListener("DOMContentLoaded", function() {
     const boutonFuyant = document.getElementById('boutonFuyant');
     const distanceFuite = 150;
     const confettiContainer = document.getElementById('confetti-container');
-    let clickCount = 3;  // Initialisation du compte à rebours à 5
+    let clickCount = 3;  // Nombre de clics nécessaires pour révéler le menu secret
     let confettiInterval;
+
+    // ----- Mode sombre / clair (préférence mémorisée dans le navigateur) -----
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = themeToggle.querySelector('i');
+
+    function appliquerTheme(sombre) {
+        document.body.classList.toggle('dark', sombre);
+        themeIcon.className = sombre ? 'fas fa-sun' : 'fas fa-moon';
+        themeToggle.setAttribute('aria-label', sombre ? 'Activer le mode clair' : 'Activer le mode sombre');
+    }
+
+    // Applique la préférence enregistrée, sinon celle du système d'exploitation
+    const themeEnregistre = localStorage.getItem('theme');
+    appliquerTheme(themeEnregistre ? themeEnregistre === 'dark'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    themeToggle.addEventListener('click', function() {
+        const sombre = !document.body.classList.contains('dark');
+        localStorage.setItem('theme', sombre ? 'dark' : 'light');
+        appliquerTheme(sombre);
+    });
 
     // Affiche le compte à rebours initial sur le bouton
     boutonFuyant.innerHTML = `<span id="ligne1">Cliquez ${clickCount} fois pour la surprise 🎁 </span><br><span id="ligne2">❌ REFUSER LES COOKIES </span>`;
@@ -372,35 +409,23 @@ document.addEventListener("DOMContentLoaded", function() {
 	
 	
 
-    // Fonction pour afficher le menu secret avec un effet spectaculaire
-    function afficherMenuSecret() {
-        const menuSecret = document.getElementById('menu-secret');
-        menuSecret.style.display = 'block';
-        setTimeout(() => {
-            menuSecret.style.opacity = '1';
-            menuSecret.style.transform = 'scale(1) translate(0, 0)';
-        }, 10); // Délai court pour déclencher l'animation après l'affichage
-    }
-
-   // Gestion de l'affichage du contenu du menu déroulant lors du clic sur "Menu secret"
-document.getElementById('menuButton').addEventListener('click', () => {
+    // ----- Menu secret -----
+    const menuSecret = document.getElementById('menu-secret');
+    const menuButton = document.getElementById('menuButton');
     const menuContent = document.getElementById('menuContent');
-    if (menuContent.style.display === 'none' || menuContent.style.display === '') {
-        menuContent.style.display = 'block';
-        setTimeout(() => {
-            menuContent.style.maxHeight = '300px'; // Déroulement complet
-            menuContent.style.opacity = '1';
-        }, 10);
-    } else {
-        menuContent.style.maxHeight = '0'; // Réduction de la hauteur
-        menuContent.style.opacity = '0';
-        setTimeout(() => {
-            menuContent.style.display = 'none';
-        }, 500); // Assure que l'animation se termine avant de cacher le menu
+
+    // Révèle le panneau du menu secret avec une animation d'apparition (gérée en CSS)
+    function afficherMenuSecret() {
+        menuSecret.classList.add('visible');
+        menuSecret.setAttribute('aria-hidden', 'false');
     }
-});
 
-
+    // Ouvre / referme le contenu du menu avec une transition fluide sur la hauteur réelle
+    menuButton.addEventListener('click', function() {
+        const ouvert = menuSecret.classList.toggle('open');
+        menuButton.setAttribute('aria-expanded', ouvert);
+        menuContent.style.maxHeight = ouvert ? menuContent.scrollHeight + 'px' : '0';
+    });
 
     // Fonction pour arrêter les confettis
     function stopConfetti() {
@@ -414,32 +439,55 @@ document.getElementById('menuButton').addEventListener('click', () => {
             }, 2000);
         });
     }
+
+    // ----- Easter egg : code Konami (↑ ↑ ↓ ↓ ← → ← → B A) -----
+    const codeKonami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let positionKonami = 0;
+
+    document.addEventListener('keydown', function(event) {
+        const touche = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+        if (touche === codeKonami[positionKonami]) {
+            positionKonami++;
+            if (positionKonami === codeKonami.length) {
+                positionKonami = 0;
+                modeFete();
+            }
+        } else {
+            positionKonami = (touche === codeKonami[0]) ? 1 : 0;
+        }
+    });
+
+    // Pluie de confettis + nom en arc-en-ciel pendant quelques secondes
+    function modeFete() {
+        const nom = document.getElementById('nom');
+        nom.classList.add('arc-en-ciel');
+        for (let i = 0; i < 200; i++) {
+            setTimeout(createConfetti, Math.random() * 2500);
+        }
+        afficherToast('🎮 Code Konami détecté : mode fête activé !');
+        setTimeout(function() { nom.classList.remove('arc-en-ciel'); }, 8000);
+    }
+
+    // Petit message temporaire en bas de l'écran
+    function afficherToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        requestAnimationFrame(function() { toast.classList.add('show'); });
+        setTimeout(function() {
+            toast.classList.remove('show');
+            setTimeout(function() { toast.remove(); }, 500);
+        }, 4000);
+    }
 });
 
-  const btn  = document.getElementById('menuButton');
-  const menu = document.getElementById('menuContent');
-
-  btn.addEventListener('click', function(e) {
-    e.preventDefault();
-    const isOpen = menu.classList.toggle('open');
-
-    if (isOpen) {
-      // on ouvre → on mesure et on ajuste la largeur du bouton  
-      // (display:block défini par la classe .open)
-      requestAnimationFrame(() => {
-        const w = menu.scrollWidth;
-        btn.style.width = w + 'px';
-      });
-    } else {
-      // on referme → on remet le bouton à sa largeur auto après la transition
-      menu.addEventListener('transitionend', function hide() {
-        menu.style.display = 'none';
-        menu.removeEventListener('transitionend', hide);
-      });
-      btn.style.width = '';
-    }
-  });
-
+// ----- Easter egg : message pour les curieux qui ouvrent la console -----
+console.log(
+    '%c👋 Salut, curieux·se !%c\n\nPuisque tu es là, tu mérites un indice : essaie le code Konami sur cette page…\n↑ ↑ ↓ ↓ ← → ← → B A\n\n— Nicolas',
+    'font-size: 1.5em; font-weight: bold; color: #f2a65a;',
+    'font-size: 1em; color: inherit;'
+);
   </script>
   
 

@@ -760,13 +760,13 @@ input, select, textarea {
 
 				#projets .cartes-projets a:hover {
 					background: rgba(255, 255, 255, 0.18);
-					border-color: #ffdd57;
+					border-color: var(--accent-clair);
 					box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 					transform: translateY(-4px);
 				}
 
 					#projets .cartes-projets a:hover .icone {
-						color: #ffdd57;
+						color: var(--accent-clair);
 					}
 
 				#projets .cartes-projets .icone {
@@ -1245,31 +1245,77 @@ input, select, textarea {
 }
 
 
+/* Palette du site : teintes reprises de l'image de fond
+   (ciel bleu sarcelle, roche cuivrée, neige) */
+:root {
+    --accent: #f2a65a;                       /* cuivre / ambre, rappelle la roche */
+    --accent-fonce: #d97f35;                 /* cuivre plus soutenu pour les dégradés */
+    --accent-clair: #ffc98b;                 /* ambre clair pour les survols */
+    --panneau: rgba(13, 27, 38, 0.78);       /* bleu nuit translucide */
+    --panneau-bord: rgba(255, 255, 255, 0.18);
+    --texte-clair: #f5f7fa;
+}
+
 #boutonFuyant {
     position: absolute;
-    padding: 8px 12px; /* padding du bouton */
-    background: linear-gradient(135deg, #ff5f6d, #ffc371);
+    padding: 8px 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-fonce));
     color: #fff;
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.25);
     cursor: pointer;
-    border-radius: 25px; /* rayon des coins arrondis */
+    border-radius: 25px;
     text-align: center;
     transition: all 0.3s ease;
     z-index: 1000;
-    font-size: 12px; /* taille de la police */
-    line-height: 1.2; /* espacement entre les lignes */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* intensité de l'ombre */
+    font-size: 12px;
+    line-height: 1.2;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
 }
 
 #boutonFuyant:hover {
-    background: linear-gradient(135deg, #ff9966, #ff5e62);
+    background: linear-gradient(135deg, var(--accent-clair), var(--accent));
     transform: translateY(-3px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3); /* Ajuste l'ombre lors du survol */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
 }
 
 #boutonFuyant:active {
     transform: translateY(2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Bouton de bascule mode sombre / clair */
+#themeToggle {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    width: 2.75em;
+    height: 2.75em;
+    border-radius: 50%;
+    border: 1px solid var(--panneau-bord);
+    background: var(--panneau);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: var(--texte-clair);
+    cursor: pointer;
+    z-index: 1001;
+    font-size: 1em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: transform 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+#themeToggle:hover {
+    transform: rotate(20deg) scale(1.1);
+    color: var(--accent-clair);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* Mode sombre : on assombrit la photo de fond, les panneaux translucides suivent naturellement */
+#bg {
+    transition: filter 0.8s ease;
+}
+
+body.dark #bg {
+    filter: brightness(0.4) saturate(0.7);
 }
 
 #ligne1 {
@@ -1354,102 +1400,135 @@ input, select, textarea {
 }
 
 
-/* Style général du menu secret */
+/* ---- Menu secret : panneau translucide assorti aux cartes projets ---- */
+
 #menu-secret {
     position: fixed;
-    top: 10px;
-    right: 10px;
-    background: linear-gradient(145deg, #61dafb, #1e90ff); /* Dégradé du bleu clair au bleu vif */
-    border: 2px solid #1c6ea4; /* Bordure en bleu vif */
-    padding: 10px;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3), inset 0px 0px 15px rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    top: 12px;
+    right: 12px;
+    width: min(21em, calc(100vw - 1.5em));      /* s'adapte aux petits écrans */
+    max-height: calc(100vh - 1.5em);
+    background: var(--panneau);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--panneau-bord);
+    border-radius: 0.75em;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    padding: 0.5em;
     z-index: 1000;
+    display: flex;
+    flex-direction: column;
     opacity: 0;
-    transform: scale(0.5) translate(50%, -50%);
-    transition: transform 0.6s ease, opacity 0.6s ease;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-12px) scale(0.95);
+    transition: opacity 0.45s ease, visibility 0.45s ease,
+                transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Style du bouton du menu */
+#menu-secret.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+}
+
+/* Bouton d'ouverture du menu */
 #menuButton {
-    background-color: #ffdd57; /* Couleur jaune vif */
-    color: #333; /* Couleur du texte en gris foncé pour plus de contraste */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-fonce));
+    color: #fff;
     border: none;
     cursor: pointer;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 0.7em 1em;
+    border-radius: 0.5em;
     font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+    letter-spacing: 0.05em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: filter 0.25s ease, box-shadow 0.25s ease;
 }
 
 #menuButton:hover {
-    background-color: #fbc531; /* Jaune un peu plus foncé au survol */
-    transform: scale(1.08); /* Augmentation de la taille au survol */
+    filter: brightness(1.12);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
 
-/* Style du menu déroulant */
+/* Le chevron pivote quand le menu est ouvert */
+#menuButton .chevron {
+    font-size: 0.85em;
+    transition: transform 0.4s ease;
+}
+
+#menu-secret.open #menuButton .chevron {
+    transform: rotate(180deg);
+}
+
+/* Contenu déroulant : la hauteur réelle est posée en JS pour une transition fluide */
 #menuContent {
-    display: none;
-    list-style-type: none;
-    margin: 10px 0 0 0;
+    list-style: none;
+    margin: 0;
     padding: 0;
-	height: auto;        /* <- laisse la liste s’étendre */
-    background: linear-gradient(145deg, #a8e6cf, #dcedc1); /* Dégradé pastel vert pour plus de luminosité */
-    border: 1px solid #1c6ea4;
-    border-radius: 10px;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-    animation: slideDown 0.5s ease forwards;
-    transform-origin: top;
-    max-height: 80vh;    /* optionnel : empêche un trop grand menu */
-    overflow-y: auto;    /* optionnel : ajoute un scroll si > max-height */
-    transition: max-height 0.5s ease, opacity 0.5s ease;
+    max-height: 0;
     opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease, opacity 0.45s ease, margin 0.45s ease;
 }
 
-/* Animation pour l'apparition du menu déroulant */
-@keyframes slideDown {
-    0% {
-        max-height: 0;
-        opacity: 0;
-    }
-    100% {
-        max-height: 300px;
-        opacity: 1;
-    }
+#menu-secret.open #menuContent {
+    opacity: 1;
+    margin-top: 0.5em;
+    overflow-y: auto;
 }
 
-/* Style des éléments du menu */
 #menuContent li {
     margin: 0;
     padding: 0;
-    border-bottom: 1px solid #1c6ea4;
 }
 
-#menuContent li:last-child {
-    border-bottom: none;
-}
-
-/* Style pour les liens du menu */
-#menuContent li a {
+#menuContent a {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    color: var(--texte-clair);
     text-decoration: none;
-    color: #1e90ff; /* Bleu vif pour le texte */
-    display: block;
-    padding: 12px;
-    transition: background-color 0.3s ease, color 0.3s ease, padding-left 0.3s;
-    background: transparent;
-    font-weight: 600;
-    border-radius: 5px;
+    padding: 0.6em 0.75em;
+    border-radius: 0.5em;
+    font-size: 0.9em;
+    transition: background-color 0.25s ease, color 0.25s ease, padding-left 0.25s ease;
 }
 
-/* Effet de survol pour les liens du menu */
-#menuContent li a:hover {
-    background-color: gold; /* couleur au survol */
-    color: #fff; /* Texte en blanc */
-    padding-left: 20px;
-    box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.3);
-    border-radius: 5px;
+#menuContent a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--accent-clair);
+    padding-left: 1.1em;
+}
+
+/* Intitulé d'un groupe de liens (non cliquable) */
+#menuContent .titre-groupe {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    padding: 0.85em 0.75em 0.35em;
+    font-size: 0.7em;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--texte-clair);
+    opacity: 0.65;
+}
+
+#menuContent .titre-groupe small {
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+#menuContent .sous-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 0.6em;
 }
 
 
@@ -1464,7 +1543,7 @@ input, select, textarea {
     left: 50%; /* Centrer le nuage horizontalement */
     transform: translateX(-50%); /* Ajuster pour que le nuage soit parfaitement centré */
     display: block;
-    width: 650px; /* Ajustez cette valeur pour la taille souhaitée du nuage */
+    width: min(650px, 90vw); /* Taille du nuage, bornée sur les petits écrans */
     height: auto; /* Conserver les proportions de l'image */
     cursor: pointer;
     transition: opacity 1s ease, transform 1s ease; /* Ajoute une transition par défaut */
@@ -1478,5 +1557,43 @@ input, select, textarea {
 
 #cloudContainer:hover img {
     transform: scale(1.1); /* Agrandit l'image de 10% au survol */
+}
+
+/* ---- Message temporaire (toast) affiché en bas de l'écran ---- */
+.toast {
+    position: fixed;
+    bottom: 2em;
+    left: 50%;
+    transform: translateX(-50%) translateY(1em);
+    background: var(--panneau);
+    color: var(--texte-clair);
+    border: 1px solid var(--panneau-bord);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    padding: 0.8em 1.4em;
+    border-radius: 2em;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ---- Effet arc-en-ciel sur le nom (déclenché par le code Konami) ---- */
+@keyframes teinte-arc-en-ciel {
+    0%   { color: #ff6b6b; }
+    25%  { color: #ffd166; }
+    50%  { color: #6bffb8; }
+    75%  { color: #6bb8ff; }
+    100% { color: #ff6b6b; }
+}
+
+#nom.arc-en-ciel {
+    animation: teinte-arc-en-ciel 1.5s linear infinite;
 }
 
