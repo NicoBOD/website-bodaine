@@ -29,6 +29,38 @@
 		<meta property="og:image" content="https://bodaine.fr/assets/images/logo.jpg"> <!-- URL absolue requise pour le partage sur les réseaux sociaux -->
 		<meta name="robots" content="index, follow">
 
+		<!-- Données structurées schema.org (JSON-LD) pour améliorer la fiche dans les moteurs de recherche -->
+		<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@graph": [
+				{
+					"@type": "Person",
+					"@id": "https://bodaine.fr/#nicolas-bodaine",
+					"name": "Nicolas Bodaine",
+					"url": "https://bodaine.fr",
+					"image": "https://bodaine.fr/assets/images/logo.jpg",
+					"jobTitle": "Formateur IT freelance",
+					"description": "Formateur IT freelance spécialisé en systèmes, réseaux, cloud et cybersécurité.",
+					"knowsAbout": ["Systèmes", "Réseaux", "Cloud", "Cybersécurité", "Formation professionnelle"],
+					"sameAs": [
+						"https://www.linkedin.com/in/bodaine/",
+						"https://github.com/NicoBOD"
+					],
+					"memberOf": { "@id": "https://www.tutotech.org/#organisation" }
+				},
+				{
+					"@type": "Organization",
+					"@id": "https://www.tutotech.org/#organisation",
+					"name": "TutoTech",
+					"url": "https://www.tutotech.org",
+					"description": "Association dédiée à l'accessibilité numérique pour tous, en particulier pour les personnes en difficulté ou isolées.",
+					"sameAs": ["https://github.com/TutoTech"]
+				}
+			]
+		}
+		</script>
+
 
 		<link rel="stylesheet" href="assets/css/main.css" />
 		<!-- Lien vers la feuille de style CSS principale (main.css) qui se trouve dans le dossier 'assets/css' -->
@@ -97,15 +129,26 @@
 					<h1 id="nom">Nicolas BODAINE</h1>
 					<!-- Titre principal de la page affiché en gros -->
 				
-					<p>Formateur IT &nbsp;&bull;&nbsp; Freelance &nbsp;&bull;&nbsp; Systèmes/Réseaux/Cloud/Cybersécurité</p>
-					<!-- Paragraphe décrivant l'activité de Nicolas BODAINE. 'nbsp;' ajoute des espaces, 'bull;' ajoute des puces (•) -->
+					<p id="sousTitre">
+						<!-- Texte invisible qui réserve la place finale (évite que la page bouge pendant la frappe).
+						     Il doit être STRICTEMENT identique à la chaîne tapée en JS pour que les retours à la ligne coïncident. -->
+						<span class="texte-fantome" aria-hidden="true">Formateur IT • Freelance • Systèmes/Réseaux/Cloud/Cybersécurité</span>
+						<!-- Texte réellement affiché, tapé lettre par lettre en JS -->
+						<span class="texte-reel" aria-hidden="true"><span id="texteTape"></span><span id="curseur"></span></span>
+						<!-- Version complète pour les lecteurs d'écran -->
+						<span class="sr-only">Formateur IT • Freelance • Systèmes/Réseaux/Cloud/Cybersécurité</span>
+					</p>
+					<!-- Sous-titre animé avec un effet machine à écrire -->
 
 					<!-- Utilisation de la balise <nav> pour regrouper les liens de navigation -->
 					<nav aria-label="Réseaux sociaux">
 						<ul>
 							<!-- Lien vers LinkedIn avec l'attribut aria-label pour améliorer l'accessibilité -->
 							<li><a href="https://www.linkedin.com/in/bodaine/" class="icon brands fa-linkedin" aria-label="LinkedIn"><span class="label">LinkedIn</span></a></li>
-						  
+
+							<!-- Lien vers le profil GitHub -->
+							<li><a href="https://github.com/NicoBOD" target="_blank" rel="noopener noreferrer" class="icon brands fa-github" aria-label="GitHub"><span class="label">GitHub</span></a></li>
+
 							<!-- Lien vers une adresse email, utilisant une icône en forme d'enveloppe -->
 							<li><a href="mailto:contact-nicolas-bodaine.okay540@aleeas.com" class="icon solid fa-envelope" aria-label="Email"><span class="label">Email</span></a></li>
 						</ul>
@@ -152,8 +195,11 @@
 
 				<!-- Utilisation de la balise <footer> pour le pied de page -->
 				<footer id="footer">
-					<span class="copyright"> Co-fondateur de l'association <a href="https://www.tutotech.org">TutoTech</a></span>
-					<!-- Texte de copyright : un '♥' est affiché, avec un lien vers le site TutoTech -->
+					<span class="copyright">
+						<span id="coeur" title="♥">♥</span>
+						Co-fondateur de l'association <a href="https://www.tutotech.org">TutoTech</a>
+						<a href="https://github.com/TutoTech" target="_blank" rel="noopener noreferrer" class="lien-github-footer" aria-label="GitHub de TutoTech"><i class="fab fa-github" aria-hidden="true"></i></a>
+					</span>
 				</footer>
 				<!-- Fin du pied de page -->
 
@@ -202,23 +248,31 @@
 		<!-- Fermeture de la balise <main> -->
 <div id="confetti-container"></div>
 
+		<!-- Mini-jeu caché : quiz réseau (tapez « quiz » ou faites deux fois le code Konami) -->
+		<div id="quiz-overlay" aria-hidden="true">
+			<div id="quiz-panneau" role="dialog" aria-modal="true" aria-labelledby="quiz-titre">
+				<button id="quiz-fermer" aria-label="Fermer le quiz">&times;</button>
+				<h2 id="quiz-titre"><i class="fas fa-network-wired" aria-hidden="true"></i> Quiz réseau</h2>
+				<p id="quiz-progression"></p>
+				<p id="quiz-question"></p>
+				<div id="quiz-reponses"></div>
+				<p id="quiz-feedback"></p>
+				<button id="quiz-suivant">Question suivante</button>
+			</div>
+		</div>
+
 		<script>
 			<!-- Insertion d'un script JavaScript -->
 
 			// La fonction ci-dessous s'exécute lorsque la page est entièrement chargée
-			window.onload = function() { 
-				document.body.classList.remove('is-preload'); 
+			window.onload = function() {
+				document.body.classList.remove('is-preload');
 			}
 			// Supprime la classe 'is-preload' du corps de la page pour permettre des animations ou des effets CSS
 
-			// La fonction ci-dessous désactive le défilement tactile
-			window.ontouchmove = function() { 
-				return false; 
-			}
-
 			// La fonction ci-dessous s'exécute lors d'un changement d'orientation sur les appareils mobiles
-			window.onorientationchange = function() { 
-				document.body.scrollTop = 0; 
+			window.onorientationchange = function() {
+				document.body.scrollTop = 0;
 			}
 			// Réinitialise le défilement de la page en haut lors d'un changement d'orientation sur les appareils mobiles
 		</script>
@@ -258,6 +312,85 @@ document.addEventListener("DOMContentLoaded", function() {
         localStorage.setItem('theme', sombre ? 'dark' : 'light');
         appliquerTheme(sombre);
     });
+
+    // Préférence d'accessibilité : réduire les animations
+    const reduireAnimations = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ----- Effet machine à écrire sur le sous-titre -----
+    const texteSousTitre = 'Formateur IT • Freelance • Systèmes/Réseaux/Cloud/Cybersécurité';
+    const texteTape = document.getElementById('texteTape');
+    const curseur = document.getElementById('curseur');
+
+    if (reduireAnimations) {
+        texteTape.textContent = texteSousTitre;
+        curseur.classList.add('fini');
+    } else {
+        let lettres = 0;
+        // Démarre après l'apparition du header (animation du template à 2,25 s)
+        setTimeout(function taper() {
+            texteTape.textContent = texteSousTitre.slice(0, ++lettres);
+            if (lettres < texteSousTitre.length) {
+                setTimeout(taper, 30 + Math.random() * 45);
+            } else {
+                // Le curseur clignote encore un peu puis s'efface
+                setTimeout(function() { curseur.classList.add('fini'); }, 2500);
+            }
+        }, 2600);
+    }
+
+    // ----- Parallaxe légère du contenu au mouvement de la souris (ordinateur uniquement) -----
+    if (!reduireAnimations && window.matchMedia('(pointer: fine)').matches) {
+        const main = document.getElementById('main');
+        let cibleX = 0, cibleY = 0, posX = 0, posY = 0;
+
+        window.addEventListener('mousemove', function(event) {
+            cibleX = event.clientX / window.innerWidth - 0.5;
+            cibleY = event.clientY / window.innerHeight - 0.5;
+        });
+
+        (function animerParallaxe() {
+            // Interpolation douce vers la position cible
+            posX += (cibleX - posX) * 0.05;
+            posY += (cibleY - posY) * 0.05;
+            main.style.transform = 'translate3d(' + (posX * -14).toFixed(2) + 'px, ' + (posY * -10).toFixed(2) + 'px, 0)';
+            requestAnimationFrame(animerParallaxe);
+        })();
+    }
+
+    // ----- Easter egg : 5 clics sur le cœur du footer -----
+    const coeur = document.getElementById('coeur');
+    let clicsCoeur = 0;
+
+    coeur.addEventListener('click', function() {
+        // Relance l'animation de battement à chaque clic
+        coeur.classList.remove('bat');
+        void coeur.offsetWidth;
+        coeur.classList.add('bat');
+
+        if (++clicsCoeur === 5) {
+            clicsCoeur = 0;
+            pluieDeCoeurs();
+            afficherToast('Merci pour tout cet amour ! ❤️');
+        }
+    });
+
+    // Fait pleuvoir des cœurs sur toute la largeur de l'écran
+    function pluieDeCoeurs() {
+        const couleurs = ['#ff5f7a', '#ff8fa3', '#ffc2d1', '#e63956'];
+        for (let i = 0; i < 45; i++) {
+            setTimeout(function() {
+                const c = document.createElement('span');
+                c.className = 'coeur-confetti';
+                c.textContent = '♥';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.fontSize = (0.8 + Math.random() * 1.6) + 'em';
+                c.style.color = couleurs[Math.floor(Math.random() * couleurs.length)];
+                c.style.animationDuration = (2.5 + Math.random() * 2.5) + 's';
+                document.body.appendChild(c);
+                setTimeout(function() { c.remove(); }, 5200);
+            }, Math.random() * 1200);
+        }
+    }
 
     // Affiche le compte à rebours initial sur le bouton
     boutonFuyant.innerHTML = `<span id="ligne1">Cliquez ${clickCount} fois pour la surprise 🎁 </span><br><span id="ligne2">❌ REFUSER LES COOKIES </span>`;
@@ -441,8 +574,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // ----- Easter egg : code Konami (↑ ↑ ↓ ↓ ← → ← → B A) -----
+    // Une fois : mode fête. Deux fois en moins de 30 secondes : quiz réseau !
     const codeKonami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
     let positionKonami = 0;
+    let dernierKonami = 0;
 
     document.addEventListener('keydown', function(event) {
         const touche = event.key.length === 1 ? event.key.toLowerCase() : event.key;
@@ -450,7 +585,14 @@ document.addEventListener("DOMContentLoaded", function() {
             positionKonami++;
             if (positionKonami === codeKonami.length) {
                 positionKonami = 0;
-                modeFete();
+                const maintenant = Date.now();
+                if (maintenant - dernierKonami < 30000) {
+                    dernierKonami = 0;
+                    ouvrirQuiz();
+                } else {
+                    dernierKonami = maintenant;
+                    modeFete();
+                }
             }
         } else {
             positionKonami = (touche === codeKonami[0]) ? 1 : 0;
@@ -464,8 +606,173 @@ document.addEventListener("DOMContentLoaded", function() {
         for (let i = 0; i < 200; i++) {
             setTimeout(createConfetti, Math.random() * 2500);
         }
-        afficherToast('🎮 Code Konami détecté : mode fête activé !');
+        afficherToast('🎮 Code Konami ! Refaites-le dans les 30 s pour un quiz réseau 🧠');
         setTimeout(function() { nom.classList.remove('arc-en-ciel'); }, 8000);
+    }
+
+    // ----- Easter eggs au clavier : tapez « quiz » ou « matrix » -----
+    let tamponClavier = '';
+    document.addEventListener('keydown', function(event) {
+        if (event.key.length !== 1) return;
+        tamponClavier = (tamponClavier + event.key.toLowerCase()).slice(-10);
+        if (tamponClavier.endsWith('quiz')) {
+            tamponClavier = '';
+            ouvrirQuiz();
+        } else if (tamponClavier.endsWith('matrix')) {
+            tamponClavier = '';
+            basculerModeCRT();
+        }
+    });
+
+    // La touche Échap ferme le quiz, sinon quitte le mode terminal rétro
+    document.addEventListener('keydown', function(event) {
+        if (event.key !== 'Escape') return;
+        if (quizOverlay.classList.contains('visible')) {
+            fermerQuiz();
+        } else if (document.body.classList.contains('crt')) {
+            basculerModeCRT();
+        }
+    });
+
+    // ----- Mode terminal rétro (CRT vert phosphore), déclenché par « matrix » -----
+    function basculerModeCRT() {
+        const actif = document.body.classList.toggle('crt');
+        afficherToast(actif
+            ? '📟 Mode terminal rétro activé — retapez « matrix » (ou Échap) pour quitter'
+            : '🌈 Retour en couleurs !');
+    }
+
+    // ----- Mini-jeu caché : quiz réseau -----
+    const questionsQuiz = [
+        { q: 'Quel port utilise SSH par défaut ?', r: ['21', '22', '443', '3389'], bonne: 1 },
+        { q: 'Que signifie « DHCP » ?', r: ['Dynamic Host Configuration Protocol', 'Direct Host Control Protocol', 'Dual Hardware Channel Process', 'Distributed Hypertext Cache Protocol'], bonne: 0 },
+        { q: 'Combien d\'adresses IP utilisables dans un /29 ?', r: ['4', '6', '8', '14'], bonne: 1 },
+        { q: 'Quel protocole traduit les noms de domaine en adresses IP ?', r: ['DHCP', 'NAT', 'DNS', 'ARP'], bonne: 2 },
+        { q: 'Quelle commande Linux affiche les adresses IP de la machine ?', r: ['ipconfig', 'ip a', 'showip', 'netcfg'], bonne: 1 },
+        { q: 'À quelle couche du modèle OSI opère le routage ?', r: ['Couche 2 — Liaison', 'Couche 3 — Réseau', 'Couche 4 — Transport', 'Couche 7 — Application'], bonne: 1 },
+        { q: 'Quel niveau de RAID duplique les données en miroir ?', r: ['RAID 0', 'RAID 1', 'RAID 5', 'RAID 10'], bonne: 1 },
+        { q: 'Quelle est l\'adresse de broadcast du réseau 192.168.1.0/24 ?', r: ['192.168.1.0', '192.168.1.1', '192.168.1.254', '192.168.1.255'], bonne: 3 }
+    ];
+
+    const quizOverlay = document.getElementById('quiz-overlay');
+    const quizProgression = document.getElementById('quiz-progression');
+    const quizQuestion = document.getElementById('quiz-question');
+    const quizReponses = document.getElementById('quiz-reponses');
+    const quizFeedback = document.getElementById('quiz-feedback');
+    const quizSuivant = document.getElementById('quiz-suivant');
+    let indexQuestion = 0;
+    let scoreQuiz = 0;
+
+    function ouvrirQuiz() {
+        indexQuestion = 0;
+        scoreQuiz = 0;
+        quizOverlay.classList.add('visible');
+        quizOverlay.setAttribute('aria-hidden', 'false');
+        afficherQuestion();
+    }
+
+    function fermerQuiz() {
+        quizOverlay.classList.remove('visible');
+        quizOverlay.setAttribute('aria-hidden', 'true');
+    }
+
+    function afficherQuestion() {
+        const q = questionsQuiz[indexQuestion];
+        quizProgression.textContent = 'Question ' + (indexQuestion + 1) + ' / ' + questionsQuiz.length + ' — Score : ' + scoreQuiz;
+        quizQuestion.textContent = q.q;
+        quizFeedback.textContent = '';
+        quizSuivant.style.display = 'none';
+        quizReponses.innerHTML = '';
+        q.r.forEach(function(reponse, i) {
+            const bouton = document.createElement('button');
+            bouton.className = 'quiz-reponse';
+            bouton.textContent = reponse;
+            bouton.addEventListener('click', function() { validerReponse(i, bouton); });
+            quizReponses.appendChild(bouton);
+        });
+    }
+
+    function validerReponse(choix, bouton) {
+        const q = questionsQuiz[indexQuestion];
+        // Désactive tout et met en évidence la bonne réponse
+        quizReponses.querySelectorAll('button').forEach(function(b, i) {
+            b.disabled = true;
+            if (i === q.bonne) b.classList.add('correcte');
+        });
+        if (choix === q.bonne) {
+            scoreQuiz++;
+            quizFeedback.textContent = '✅ Bonne réponse !';
+        } else {
+            bouton.classList.add('fausse');
+            quizFeedback.textContent = '❌ Raté ! La bonne réponse est en vert.';
+        }
+        quizProgression.textContent = 'Question ' + (indexQuestion + 1) + ' / ' + questionsQuiz.length + ' — Score : ' + scoreQuiz;
+        quizSuivant.textContent = (indexQuestion + 1 < questionsQuiz.length) ? 'Question suivante' : 'Voir mon score';
+        quizSuivant.style.display = 'inline-block';
+    }
+
+    function afficherResultatQuiz() {
+        quizProgression.textContent = '';
+        quizQuestion.textContent = 'Score final : ' + scoreQuiz + ' / ' + questionsQuiz.length;
+        quizReponses.innerHTML = '';
+        let message;
+        if (scoreQuiz === questionsQuiz.length) message = '🏆 Sans faute — un vrai pro des réseaux !';
+        else if (scoreQuiz >= 6) message = '💪 Très solide ! Encore un petit effort pour le sans-faute.';
+        else if (scoreQuiz >= 4) message = '🙂 Pas mal ! Un tour sur le Wiki Tech et ce sera parfait.';
+        else message = '📚 Ça se travaille… AdminGo est fait pour ça !';
+        quizFeedback.textContent = message;
+        quizSuivant.textContent = 'Rejouer';
+        quizSuivant.style.display = 'inline-block';
+    }
+
+    quizSuivant.addEventListener('click', function() {
+        if (indexQuestion >= questionsQuiz.length) {
+            // Écran de résultat → « Rejouer »
+            ouvrirQuiz();
+            return;
+        }
+        indexQuestion++;
+        if (indexQuestion < questionsQuiz.length) {
+            afficherQuestion();
+        } else {
+            afficherResultatQuiz();
+        }
+    });
+
+    document.getElementById('quiz-fermer').addEventListener('click', fermerQuiz);
+
+    // Un clic sur le fond assombri ferme aussi le quiz
+    quizOverlay.addEventListener('click', function(event) {
+        if (event.target === quizOverlay) fermerQuiz();
+    });
+
+    // ----- Effet saisonnier : neige en hiver, feuilles en automne, pétales au printemps -----
+    // (testable toute l'année via ?saison=hiver, ?saison=automne ou ?saison=printemps)
+    const saisonForcee = new URLSearchParams(window.location.search).get('saison');
+    const mois = new Date().getMonth() + 1;
+    let saison = saisonForcee;
+    if (!saison) {
+        if (mois === 12 || mois <= 2) saison = 'hiver';
+        else if (mois >= 9 && mois <= 11) saison = 'automne';
+        else if (mois >= 3 && mois <= 4) saison = 'printemps';
+        // de mai à août : pas d'effet
+    }
+    const symbolesSaison = { hiver: ['❄', '❅', '❆'], automne: ['🍂', '🍁'], printemps: ['🌸', '🌺'] }[saison];
+
+    if (symbolesSaison && !reduireAnimations) {
+        setInterval(function() {
+            // Limite le nombre de particules simultanées pour rester léger
+            if (document.querySelectorAll('.particule-saison').length >= 25) return;
+            const p = document.createElement('span');
+            p.className = 'particule-saison' + (Math.random() < 0.5 ? ' derive-gauche' : '');
+            p.textContent = symbolesSaison[Math.floor(Math.random() * symbolesSaison.length)];
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.fontSize = (0.6 + Math.random() * 1.1) + 'em';
+            p.style.opacity = 0.4 + Math.random() * 0.6;
+            p.style.animationDuration = (7 + Math.random() * 8) + 's';
+            document.body.appendChild(p);
+            setTimeout(function() { p.remove(); }, 16000);
+        }, 800);
     }
 
     // Petit message temporaire en bas de l'écran
@@ -484,7 +791,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // ----- Easter egg : message pour les curieux qui ouvrent la console -----
 console.log(
-    '%c👋 Salut, curieux·se !%c\n\nPuisque tu es là, tu mérites un indice : essaie le code Konami sur cette page…\n↑ ↑ ↓ ↓ ← → ← → B A\n\n— Nicolas',
+    '%c👋 Salut, curieux·se !%c\n\nPuisque tu es là, tu mérites quelques indices :\n• Essaie le code Konami… ↑ ↑ ↓ ↓ ← → ← → B A (deux fois pour une surprise de plus 🧠)\n• Tape « quiz » pour tester tes connaissances réseau\n• Tape « matrix » pour voyager dans le temps 📟\n\n— Nicolas',
     'font-size: 1.5em; font-weight: bold; color: #f2a65a;',
     'font-size: 1em; color: inherit;'
 );
