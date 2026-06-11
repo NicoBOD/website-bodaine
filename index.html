@@ -221,6 +221,13 @@
             </a>
         </li>
 
+        <!-- Blague : faux piratage (inoffensif, tout revient à la normale en actualisant la page) -->
+        <li>
+            <a href="#" id="lien-piratage">
+                <i class="fas fa-skull-crossbones" aria-hidden="true"></i> Se faire pirater 😈
+            </a>
+        </li>
+
         <!-- Groupe : services cloud éthiques (liens affiliés Infomaniak) -->
         <li class="groupe">
             <span class="titre-groupe"><i class="fas fa-cloud" aria-hidden="true"></i> Services cloud éthiques <small>(liens affiliés)</small></span>
@@ -247,6 +254,28 @@
 		</main>
 		<!-- Fermeture de la balise <main> -->
 <div id="confetti-container"></div>
+
+		<!-- Blague « Se faire pirater » : faux terminal de hacker (purement visuel, F5 annule tout) -->
+		<div id="piratage-overlay" aria-hidden="true">
+			<pre id="piratage-terminal"><span id="piratage-texte"></span><span id="piratage-curseur" aria-hidden="true">█</span></pre>
+		</div>
+
+		<!-- Blague « Se faire pirater » : fausse demande de rançon parodique -->
+		<div id="piratage-rancon" aria-hidden="true">
+			<div class="rancon-cadenas" aria-hidden="true">🔒</div>
+			<h2 class="rancon-titre">VOS FICHIERS ONT ÉTÉ CHIFFRÉS !</h2>
+			<p class="rancon-message">
+				Pour les récupérer, envoyez <strong>3 croissants 🥐 et un pain au chocolat</strong><br>
+				(ou une chocolatine, on ne juge pas) à l'association TutoTech.
+			</p>
+			<p class="rancon-compteur">Auto-destruction dans <span id="rancon-secondes">10</span> s…</p>
+			<p class="rancon-note" id="rancon-note">
+				(Rien n'a vraiment été piraté, promis 🤞 Vos fichiers, votre navigateur et vos croissants
+				sont parfaitement en sécurité. Appuyez sur le bouton <strong>Actualiser ↻</strong> de votre
+				navigateur pour tout remettre en ordre.)
+			</p>
+			<button id="rancon-recuperer">↻ Tout récupérer (gratuitement)</button>
+		</div>
 
 		<!-- Mini-jeu caché : quiz réseau (tapez « quiz » ou faites deux fois le code Konami) -->
 		<div id="quiz-overlay" aria-hidden="true">
@@ -744,6 +773,101 @@ document.addEventListener("DOMContentLoaded", function() {
     // Un clic sur le fond assombri ferme aussi le quiz
     quizOverlay.addEventListener('click', function(event) {
         if (event.target === quizOverlay) fermerQuiz();
+    });
+
+    // ----- Blague du menu secret : « Se faire pirater » -----
+    // Séquence : glitch du site → faux terminal de hacker → fausse rançon parodique.
+    // Purement visuel : rien n'est enregistré, le bouton Actualiser du navigateur annule tout.
+    const piratageOverlay = document.getElementById('piratage-overlay');
+    const piratageTexte = document.getElementById('piratage-texte');
+    const piratageRancon = document.getElementById('piratage-rancon');
+    let piratageEnCours = false;
+
+    const lignesPiratage = [
+        '> Initialisation de l\'attaque... OK',
+        '> Connexion au serveur de bodaine.fr... OK',
+        '> Contournement du pare-feu... ......... contourné 😏',
+        '> Élévation de privilèges... accès root obtenu 😈',
+        '> Téléchargement de vos photos de vacances... 12%... 47%... 89%... OK',
+        '> Analyse de votre historique YouTube... OK (très intéressant 🤨)',
+        '> Récupération de vos mots de passe... « azerty123 » ?! Sérieusement ?',
+        '> Chiffrement de vos fichiers... ██████████ 100%',
+        '> Vidage de votre machine à café... OK ☕',
+        '> Effacement des traces... OK',
+        '',
+        '*** VOUS AVEZ ÉTÉ PIRATÉ 💀 ***'
+    ];
+
+    document.getElementById('lien-piratage').addEventListener('click', function(event) {
+        event.preventDefault();
+        if (piratageEnCours) return;
+        piratageEnCours = true;
+
+        // Étape 1 : le site part en vrille pendant un court instant
+        document.body.classList.add('glitch');
+        setTimeout(function() {
+            document.body.classList.remove('glitch');
+            demarrerFauxTerminal();
+        }, 1600);
+    });
+
+    // Étape 2 : le faux terminal tape ses lignes de « piratage » une à une
+    function demarrerFauxTerminal() {
+        piratageOverlay.classList.add('visible');
+        piratageOverlay.setAttribute('aria-hidden', 'false');
+
+        let indexLigne = 0;
+        let indexCaractere = 0;
+
+        (function taperPiratage() {
+            if (indexLigne >= lignesPiratage.length) {
+                setTimeout(afficherRancon, 1400);
+                return;
+            }
+            const ligne = lignesPiratage[indexLigne];
+            if (indexCaractere < ligne.length) {
+                piratageTexte.textContent += ligne[indexCaractere++];
+                setTimeout(taperPiratage, 10 + Math.random() * 25);
+            } else {
+                // Ligne terminée : saut de ligne puis petite pause dramatique
+                piratageTexte.textContent += '\n';
+                // La dernière ligne (le titre) est mise en évidence par le CSS via la classe ci-dessous
+                if (indexLigne === lignesPiratage.length - 1) {
+                    piratageTexte.classList.add('pirate-final');
+                }
+                indexLigne++;
+                indexCaractere = 0;
+                setTimeout(taperPiratage, 250 + Math.random() * 550);
+            }
+        })();
+    }
+
+    // Étape 3 : la fausse rançon, son compte à rebours… et le message rassurant
+    function afficherRancon() {
+        piratageRancon.classList.add('visible');
+        piratageRancon.setAttribute('aria-hidden', 'false');
+
+        let secondes = 10;
+        const compteur = document.getElementById('rancon-secondes');
+        const intervalle = setInterval(function() {
+            secondes--;
+            if (secondes > 0) {
+                compteur.textContent = secondes;
+            } else {
+                clearInterval(intervalle);
+                // Le compte à rebours n'explose rien du tout…
+                document.querySelector('.rancon-compteur').textContent =
+                    '💥 … Bon, d\'accord. On vous rend tout gratuitement 😇';
+                // … et on rassure tout le monde
+                document.getElementById('rancon-note').classList.add('visible');
+                document.getElementById('rancon-recuperer').classList.add('visible');
+            }
+        }, 1000);
+    }
+
+    // Le bouton « Tout récupérer » fait la même chose que le bouton Actualiser du navigateur
+    document.getElementById('rancon-recuperer').addEventListener('click', function() {
+        window.location.reload();
     });
 
     // ----- Effet saisonnier : neige en hiver, feuilles en automne, pétales au printemps -----
