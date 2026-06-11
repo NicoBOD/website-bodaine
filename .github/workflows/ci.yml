@@ -1,0 +1,57 @@
+# Intégration continue du site bodaine.fr
+# Trois vérifications rapides et déterministes (aucune dépendance réseau flaky) :
+#   1. validité du HTML (html-validate, config dans .htmlvalidate.json)
+#   2. syntaxe de tous les scripts JavaScript inline
+#   3. existence de tous les fichiers locaux référencés (CSS, images, polices…)
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  html:
+    name: HTML valide
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Valider index.html et 404.html
+        run: npx --yes html-validate@8 index.html 404.html
+
+  javascript:
+    name: JavaScript valide
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Vérifier la syntaxe des scripts inline
+        run: node scripts/verifier-js.mjs
+
+  liens:
+    name: Fichiers référencés présents
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Vérifier les références locales (href, src, url)
+        run: node scripts/verifier-liens.mjs

@@ -2175,3 +2175,90 @@ body.glitch #wrapper {
 #rancon-recuperer:hover {
     filter: brightness(1.12);
 }
+
+/* ---- Blague « Crasher Windows » : faux écran bleu de la mort ---- */
+
+#bsod-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100003;
+    display: none;
+    background: #0a72d8;
+    color: #fff;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 300;
+    text-align: left;
+    overflow-y: auto;
+    cursor: default;
+}
+
+#bsod-overlay.visible {
+    display: block;
+}
+
+#bsod-overlay .bsod-contenu {
+    max-width: 38em;
+    padding: 12vh 8vw 2em;
+}
+
+#bsod-overlay .bsod-smiley {
+    font-size: 6em;
+    line-height: 1.2;
+    margin-bottom: 0.25em;
+}
+
+#bsod-overlay .bsod-texte {
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin-bottom: 1.5em;
+}
+
+#bsod-overlay .bsod-pourcentage {
+    font-size: 1.1em;
+    margin-bottom: 2.5em;
+}
+
+#bsod-overlay .bsod-bas {
+    display: flex;
+    align-items: flex-start;
+    gap: 1em;
+}
+
+#bsod-qr {
+    flex-shrink: 0;
+    background: #fff;
+    border-radius: 2px;
+}
+
+#bsod-overlay .bsod-details {
+    font-size: 0.7em;
+    line-height: 1.7;
+    opacity: 0.9;
+}
+
+/* Le message de fin n'apparaît qu'une fois les « 100% » atteints */
+#bsod-overlay .bsod-fin {
+    margin-top: 2.5em;
+    font-size: 0.9em;
+    line-height: 1.6;
+    color: #cfe8ff;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+#bsod-overlay .bsod-fin.visible {
+    opacity: 1;
+}
+
+@media screen and (max-width: 480px) {
+    #bsod-overlay .bsod-smiley {
+        font-size: 4em;
+    }
+
+    #bsod-overlay .bsod-contenu {
+        padding: 8vh 6vw 2em;
+    }
+}

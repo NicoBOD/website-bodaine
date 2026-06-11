@@ -104,11 +104,11 @@
 			
 			
 			<!-- Bouton de bascule entre mode clair et mode sombre (préférence mémorisée) -->
-			<button id="themeToggle" aria-label="Activer le mode sombre" title="Mode sombre / clair">
+			<button type="button" id="themeToggle" aria-label="Activer le mode sombre" title="Mode sombre / clair">
 				<i class="fas fa-moon" aria-hidden="true"></i>
 			</button>
 
-			<button id="boutonFuyant">
+			<button type="button" id="boutonFuyant">
     <span id="ligne1">clic = surprise !</span><br>
     <span id="ligne2">REFUSER LES COOKIES 😂</span>
 </button>
@@ -207,8 +207,8 @@
 		  
 
 			<!-- Conteneur du menu secret, invisible tant que l'easter egg n'est pas déclenché -->
-<div id="menu-secret" aria-hidden="true">
-    <button id="menuButton" aria-expanded="false" aria-controls="menuContent">
+<div id="menu-secret">
+    <button type="button" id="menuButton" aria-expanded="false" aria-controls="menuContent">
         <i class="fas fa-gift" aria-hidden="true"></i>
         <span class="libelle">Menu secret</span>
         <i class="fas fa-chevron-down chevron" aria-hidden="true"></i>
@@ -225,6 +225,13 @@
         <li>
             <a href="#" id="lien-piratage">
                 <i class="fas fa-skull-crossbones" aria-hidden="true"></i> Se faire pirater 😈
+            </a>
+        </li>
+
+        <!-- Blague : faux écran bleu Windows (inoffensif lui aussi) -->
+        <li>
+            <a href="#" id="lien-bsod">
+                <i class="fas fa-desktop" aria-hidden="true"></i> Crasher Windows 💙
             </a>
         </li>
 
@@ -256,12 +263,12 @@
 <div id="confetti-container"></div>
 
 		<!-- Blague « Se faire pirater » : faux terminal de hacker (purement visuel, F5 annule tout) -->
-		<div id="piratage-overlay" aria-hidden="true">
+		<div id="piratage-overlay">
 			<pre id="piratage-terminal"><span id="piratage-texte"></span><span id="piratage-curseur" aria-hidden="true">█</span></pre>
 		</div>
 
 		<!-- Blague « Se faire pirater » : fausse demande de rançon parodique -->
-		<div id="piratage-rancon" aria-hidden="true">
+		<div id="piratage-rancon">
 			<div class="rancon-cadenas" aria-hidden="true">🔒</div>
 			<h2 class="rancon-titre">VOS FICHIERS ONT ÉTÉ CHIFFRÉS !</h2>
 			<p class="rancon-message">
@@ -274,19 +281,43 @@
 				sont parfaitement en sécurité. Appuyez sur le bouton <strong>Actualiser ↻</strong> de votre
 				navigateur pour tout remettre en ordre.)
 			</p>
-			<button id="rancon-recuperer">↻ Tout récupérer (gratuitement)</button>
+			<button type="button" id="rancon-recuperer">↻ Tout récupérer (gratuitement)</button>
+		</div>
+
+		<!-- Blague « Crasher Windows » : faux écran bleu de la mort (purement visuel, F5 annule tout) -->
+		<div id="bsod-overlay">
+			<div class="bsod-contenu">
+				<div class="bsod-smiley" aria-hidden="true">:(</div>
+				<p class="bsod-texte">
+					Votre PC a rencontré un problème et doit redémarrer. Nous collectons simplement
+					quelques informations sur l'erreur (en vrai, on ne collecte rien du tout 😉),
+					puis nous redémarrerons pour vous.
+				</p>
+				<p class="bsod-pourcentage"><span id="bsod-pct">0</span>% effectués</p>
+				<div class="bsod-bas">
+					<canvas id="bsod-qr" width="84" height="84" aria-hidden="true"></canvas>
+					<div class="bsod-details">
+						<p>Pour en savoir plus sur ce problème, demandez à votre formateur préféré.</p>
+						<p>Code d'arrêt&nbsp;: ERREUR_TROP_DE_CLICS_SUR_LES_EASTER_EGGS</p>
+					</div>
+				</div>
+				<p class="bsod-fin" id="bsod-fin">
+					Redémarrage… ou pas 😄 Rien n'a planté du tout&nbsp;: cliquez n'importe où
+					(ou appuyez sur <strong>Actualiser ↻</strong>) pour récupérer votre PC.
+				</p>
+			</div>
 		</div>
 
 		<!-- Mini-jeu caché : quiz réseau (tapez « quiz » ou faites deux fois le code Konami) -->
-		<div id="quiz-overlay" aria-hidden="true">
+		<div id="quiz-overlay">
 			<div id="quiz-panneau" role="dialog" aria-modal="true" aria-labelledby="quiz-titre">
-				<button id="quiz-fermer" aria-label="Fermer le quiz">&times;</button>
+				<button type="button" id="quiz-fermer" aria-label="Fermer le quiz">&times;</button>
 				<h2 id="quiz-titre"><i class="fas fa-network-wired" aria-hidden="true"></i> Quiz réseau</h2>
 				<p id="quiz-progression"></p>
 				<p id="quiz-question"></p>
 				<div id="quiz-reponses"></div>
 				<p id="quiz-feedback"></p>
-				<button id="quiz-suivant">Question suivante</button>
+				<button type="button" id="quiz-suivant">Question suivante</button>
 			</div>
 		</div>
 
@@ -579,7 +610,6 @@ document.addEventListener("DOMContentLoaded", function() {
     // Révèle le panneau du menu secret avec une animation d'apparition (gérée en CSS)
     function afficherMenuSecret() {
         menuSecret.classList.add('visible');
-        menuSecret.setAttribute('aria-hidden', 'false');
     }
 
     // Ouvre / referme le contenu du menu avec une transition fluide sur la hauteur réelle
@@ -696,13 +726,11 @@ document.addEventListener("DOMContentLoaded", function() {
         indexQuestion = 0;
         scoreQuiz = 0;
         quizOverlay.classList.add('visible');
-        quizOverlay.setAttribute('aria-hidden', 'false');
         afficherQuestion();
     }
 
     function fermerQuiz() {
         quizOverlay.classList.remove('visible');
-        quizOverlay.setAttribute('aria-hidden', 'true');
     }
 
     function afficherQuestion() {
@@ -714,6 +742,7 @@ document.addEventListener("DOMContentLoaded", function() {
         quizReponses.innerHTML = '';
         q.r.forEach(function(reponse, i) {
             const bouton = document.createElement('button');
+            bouton.type = 'button';
             bouton.className = 'quiz-reponse';
             bouton.textContent = reponse;
             bouton.addEventListener('click', function() { validerReponse(i, bouton); });
@@ -811,10 +840,67 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 1600);
     });
 
+    // Bande-son : une connexion modem 56k synthétisée avec l'API WebAudio
+    // (tonalité, numérotation DTMF, porteuses, puis le fameux souffle blanc)
+    function jouerSonModem() {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const gainPrincipal = ctx.createGain();
+            gainPrincipal.gain.value = 0.06; // volume volontairement discret
+            gainPrincipal.connect(ctx.destination);
+
+            function bip(frequence, debut, duree, forme, volume) {
+                const oscillateur = ctx.createOscillator();
+                const gain = ctx.createGain();
+                oscillateur.type = forme || 'sine';
+                oscillateur.frequency.value = frequence;
+                gain.gain.value = volume || 1;
+                oscillateur.connect(gain);
+                gain.connect(gainPrincipal);
+                oscillateur.start(ctx.currentTime + debut);
+                oscillateur.stop(ctx.currentTime + debut + duree);
+            }
+
+            // Tonalité d'attente
+            bip(440, 0, 0.8);
+            // Numérotation : 8 chiffres en DTMF (chaque touche = 2 fréquences)
+            const touchesDTMF = [[697, 1209], [770, 1336], [852, 1477], [697, 1336], [941, 1336], [770, 1209], [852, 1336], [697, 1477]];
+            touchesDTMF.forEach(function(paire, i) {
+                const t = 1.0 + i * 0.18;
+                bip(paire[0], t, 0.12);
+                bip(paire[1], t, 0.12);
+            });
+            // Tonalité de réponse du serveur puis porteuses qui se cherchent
+            bip(2100, 2.7, 0.9);
+            bip(1200, 3.7, 1.6, 'square', 0.4);
+            bip(2400, 4.1, 1.4, 'sawtooth', 0.25);
+            bip(980, 4.5, 1.2, 'square', 0.3);
+            // Le souffle final : bruit blanc qui s'estompe
+            const dureeBruit = 2.5;
+            const debutBruit = 5.4;
+            const tampon = ctx.createBuffer(1, ctx.sampleRate * dureeBruit, ctx.sampleRate);
+            const donnees = tampon.getChannelData(0);
+            for (let i = 0; i < donnees.length; i++) donnees[i] = Math.random() * 2 - 1;
+            const bruit = ctx.createBufferSource();
+            bruit.buffer = tampon;
+            const gainBruit = ctx.createGain();
+            gainBruit.gain.setValueAtTime(0.5, ctx.currentTime + debutBruit);
+            gainBruit.gain.linearRampToValueAtTime(0, ctx.currentTime + debutBruit + dureeBruit);
+            bruit.connect(gainBruit);
+            gainBruit.connect(gainPrincipal);
+            bruit.start(ctx.currentTime + debutBruit);
+
+            // Libère les ressources audio une fois le concert terminé
+            setTimeout(function() { ctx.close(); }, (debutBruit + dureeBruit + 0.5) * 1000);
+        } catch (erreur) {
+            // Pas d'audio disponible ? La blague fonctionne très bien en silence.
+        }
+    }
+
     // Étape 2 : le faux terminal tape ses lignes de « piratage » une à une
     function demarrerFauxTerminal() {
         piratageOverlay.classList.add('visible');
-        piratageOverlay.setAttribute('aria-hidden', 'false');
+        jouerSonModem();
 
         let indexLigne = 0;
         let indexCaractere = 0;
@@ -845,7 +931,6 @@ document.addEventListener("DOMContentLoaded", function() {
     // Étape 3 : la fausse rançon, son compte à rebours… et le message rassurant
     function afficherRancon() {
         piratageRancon.classList.add('visible');
-        piratageRancon.setAttribute('aria-hidden', 'false');
 
         let secondes = 10;
         const compteur = document.getElementById('rancon-secondes');
@@ -869,6 +954,63 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('rancon-recuperer').addEventListener('click', function() {
         window.location.reload();
     });
+
+    // ----- Blague du menu secret : « Crasher Windows » (faux écran bleu) -----
+    // Purement visuel là aussi : cliquer (ou actualiser) rend son PC au visiteur.
+    const bsodOverlay = document.getElementById('bsod-overlay');
+    let bsodTermine = false;
+
+    document.getElementById('lien-bsod').addEventListener('click', function(event) {
+        event.preventDefault();
+        if (bsodOverlay.classList.contains('visible')) return;
+
+        dessinerFauxQR();
+        bsodOverlay.classList.add('visible');
+
+        // Le pourcentage grimpe par à-coups irréguliers, comme le vrai
+        const pct = document.getElementById('bsod-pct');
+        let valeur = 0;
+        const intervalle = setInterval(function() {
+            valeur = Math.min(100, valeur + Math.floor(Math.random() * 10) + 2);
+            pct.textContent = valeur;
+            if (valeur >= 100) {
+                clearInterval(intervalle);
+                bsodTermine = true;
+                document.getElementById('bsod-fin').classList.add('visible');
+            }
+        }, 900);
+    });
+
+    // Une fois les « 100% » atteints, un clic n'importe où rend son PC au visiteur
+    bsodOverlay.addEventListener('click', function() {
+        if (bsodTermine) window.location.reload();
+    });
+
+    // Un faux QR code décoratif (motif aléatoire + carrés de repérage, comme un vrai)
+    function dessinerFauxQR() {
+        const canvas = document.getElementById('bsod-qr');
+        const ctx = canvas.getContext('2d');
+        const cellule = 4;
+        const cellules = canvas.width / cellule; // 21 × 21 modules
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0a2740';
+        for (let x = 0; x < cellules; x++) {
+            for (let y = 0; y < cellules; y++) {
+                if (Math.random() < 0.45) ctx.fillRect(x * cellule, y * cellule, cellule, cellule);
+            }
+        }
+        // Les trois carrés de repérage caractéristiques
+        [[0, 0], [cellules - 7, 0], [0, cellules - 7]].forEach(function(coin) {
+            const cx = coin[0] * cellule;
+            const cy = coin[1] * cellule;
+            ctx.fillRect(cx, cy, 7 * cellule, 7 * cellule);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(cx + cellule, cy + cellule, 5 * cellule, 5 * cellule);
+            ctx.fillStyle = '#0a2740';
+            ctx.fillRect(cx + 2 * cellule, cy + 2 * cellule, 3 * cellule, 3 * cellule);
+        });
+    }
 
     // ----- Effet saisonnier : neige en hiver, feuilles en automne, pétales au printemps -----
     // (testable toute l'année via ?saison=hiver, ?saison=automne ou ?saison=printemps)
