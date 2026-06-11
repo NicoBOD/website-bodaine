@@ -1425,24 +1425,58 @@ body.dark #bg {
     z-index: 9999;
 }
 
+/* Chaque confetti a deux couches :
+   - l'extérieur suit la trajectoire (éclat depuis le point d'origine, puis chute
+     avec dérive) pilotée par des variables CSS posées en JS ;
+   - l'intérieur tournoie sur un axe 3D aléatoire, comme un vrai bout de papier. */
 .confetti {
     position: absolute;
-    width: 10px;
-    height: 10px;
-    background-color: red;
-    opacity: 0.9;
-    transform: rotate(45deg);
-    animation: confetti-fall 2.5s linear infinite;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    will-change: transform;
+    animation: chute-confetti 4s cubic-bezier(0.25, 0.45, 0.6, 1) forwards;
 }
 
-@keyframes confetti-fall {
+@keyframes chute-confetti {
     0% {
-        transform: translateY(-10vh) rotate(0deg);
+        transform: translate3d(var(--x0, 0px), var(--y0, 0px), 0);
+        opacity: 1;
+    }
+    /* L'éclat initial : le confetti est projeté hors du point d'origine */
+    12% {
+        transform: translate3d(calc(var(--x0, 0px) + var(--bx, 0px)), calc(var(--y0, 0px) + var(--by, 0px)), 0);
+        opacity: 1;
+    }
+    85% {
         opacity: 1;
     }
     100% {
-        transform: translateY(100vh) rotate(720deg);
+        transform: translate3d(calc(var(--x0, 0px) + var(--dx, 0px)), 110vh, 0);
         opacity: 0;
+    }
+}
+
+.confetti-interieur {
+    display: block;
+    animation: voltige-confetti 0.8s linear infinite;
+}
+
+/* Formes : carré par défaut, rond, ou serpentin arrondi */
+.confetti.rond .confetti-interieur {
+    border-radius: 50%;
+}
+
+.confetti.serpentin .confetti-interieur {
+    border-radius: 2px;
+}
+
+@keyframes voltige-confetti {
+    0% {
+        transform: rotate3d(var(--ax, 1), var(--ay, 0.5), 0, 0deg);
+    }
+    100% {
+        transform: rotate3d(var(--ax, 1), var(--ay, 0.5), 0, 360deg);
     }
 }
 
