@@ -1189,7 +1189,7 @@ input, select, textarea {
 			}
 
 			#projets .cartes-projets .desc {
-				display: none;
+				font-size: 0.75em;
 			} }
 
 
@@ -1199,7 +1199,7 @@ input, select, textarea {
 
 #nom {
     display: inline-block;
-    color: #333;
+    color: inherit;
     transition: color 0.3s ease, transform 0.3s ease;
     position: relative;
 }
@@ -1211,15 +1211,15 @@ input, select, textarea {
     height: 2px;
     bottom: 0;
     left: 0;
-    background-color: #efd807;
+    background-color: var(--accent);
     transition: width 0.3s ease;
 }
 
 
 /* Style pour le nom Nicolas BODAINE */
 #nom:hover {
-    color: gold; /* Changer la couleur */
-    transform: scale(1.1) ; /* Agrandir */
+    color: var(--accent-clair);
+    transform: scale(1.1);
 }
 
 
@@ -1238,10 +1238,57 @@ input, select, textarea {
     color: #ffffff; /* couleur du lien */
 }
 
-#footer .copyright::before {
-    content: "♥ "; /* Ajoute le coeur avant le texte */
-    color: red; /* couleur du coeur */
-    font-size: 16px; /* taille du coeur */
+/* Cœur cliquable du footer (easter egg : 5 clics) */
+#coeur {
+    color: #e63956;
+    font-size: 16px;
+    display: inline-block;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.2s ease;
+}
+
+#coeur:hover {
+    transform: scale(1.3);
+}
+
+#coeur.bat {
+    animation: battement 0.4s ease;
+}
+
+@keyframes battement {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.6); }
+    60%  { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Lien vers le GitHub de TutoTech dans le footer */
+#footer .lien-github-footer {
+    border: none;
+    margin-left: 0.35em;
+    transition: color 0.25s ease;
+}
+
+#footer .lien-github-footer:hover {
+    color: var(--accent-clair);
+}
+
+/* Cœurs qui tombent lors de l'easter egg du footer */
+.coeur-confetti {
+    position: fixed;
+    top: -1.5em;
+    z-index: 9999;
+    pointer-events: none;
+    animation: chute-coeur linear forwards;
+}
+
+@keyframes chute-coeur {
+    to {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+    }
 }
 
 
@@ -1595,5 +1642,132 @@ body.dark #bg {
 
 #nom.arc-en-ciel {
     animation: teinte-arc-en-ciel 1.5s linear infinite;
+}
+
+/* ---- Sous-titre avec effet machine à écrire ---- */
+
+/* Texte caché visuellement mais lu par les lecteurs d'écran */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+#sousTitre {
+    position: relative;
+}
+
+/* Le texte fantôme réserve l'encombrement final : la page ne bouge pas pendant la frappe */
+#sousTitre .texte-fantome {
+    visibility: hidden;
+    display: block;
+}
+
+#sousTitre .texte-reel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+/* Curseur clignotant de la machine à écrire */
+#curseur::after {
+    content: '|';
+    margin-left: 0.05em;
+    color: var(--accent-clair);
+    animation: clignote 0.8s step-end infinite;
+}
+
+#curseur.fini::after {
+    display: none;
+}
+
+@keyframes clignote {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+}
+
+/* ---- Bouton de retour (page 404) ---- */
+.bouton-retour {
+    display: inline-block;
+    margin-top: 1.5em;
+    padding: 0.7em 1.6em;
+    background: linear-gradient(135deg, var(--accent), var(--accent-fonce));
+    color: #fff !important;
+    text-decoration: none;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    border-radius: 2em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: filter 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.bouton-retour:hover {
+    filter: brightness(1.12);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* ---- Responsive : petits écrans et fenêtres peu hautes ----
+   Le template d'origine fige tout (#wrapper et #main en position fixe) et centre
+   verticalement via une astuce inline-block : si le contenu dépasse la hauteur de
+   l'écran, il devient inaccessible. On rend ici #main défilable, centré quand il
+   y a la place, et le footer repasse dans le flux. */
+@media screen and (max-width: 736px), screen and (max-height: 700px) {
+
+    #main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #main:before {
+        display: none;
+    }
+
+    #header {
+        top: 0;
+        /* margin auto : centré verticalement quand ça tient, défilable sinon */
+        margin: auto 0;
+        padding: 4.5em 0 1.5em; /* dégage les boutons fixes (thème / menu secret) */
+        flex-shrink: 0;
+    }
+
+    /* Le footer repasse dans le flux, après le contenu */
+    #footer {
+        position: static;
+        height: auto;
+        line-height: 1.8;
+        padding: 1.25em 1em 1.5em;
+        margin-top: auto;
+        flex-shrink: 0;
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 480px) {
+
+    /* Le nuage ne doit pas pousser le contenu hors écran */
+    #cloudContainer {
+        width: 80vw;
+    }
+
+    #header h1 {
+        font-size: 2.1em;
+    }
+
+    /* Boutons fixes un peu plus discrets */
+    #themeToggle {
+        font-size: 0.9em;
+    }
 }
 

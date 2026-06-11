@@ -97,15 +97,26 @@
 					<h1 id="nom">Nicolas BODAINE</h1>
 					<!-- Titre principal de la page affiché en gros -->
 				
-					<p>Formateur IT &nbsp;&bull;&nbsp; Freelance &nbsp;&bull;&nbsp; Systèmes/Réseaux/Cloud/Cybersécurité</p>
-					<!-- Paragraphe décrivant l'activité de Nicolas BODAINE. 'nbsp;' ajoute des espaces, 'bull;' ajoute des puces (•) -->
+					<p id="sousTitre">
+						<!-- Texte invisible qui réserve la place finale (évite que la page bouge pendant la frappe).
+						     Il doit être STRICTEMENT identique à la chaîne tapée en JS pour que les retours à la ligne coïncident. -->
+						<span class="texte-fantome" aria-hidden="true">Formateur IT • Freelance • Systèmes/Réseaux/Cloud/Cybersécurité</span>
+						<!-- Texte réellement affiché, tapé lettre par lettre en JS -->
+						<span class="texte-reel" aria-hidden="true"><span id="texteTape"></span><span id="curseur"></span></span>
+						<!-- Version complète pour les lecteurs d'écran -->
+						<span class="sr-only">Formateur IT • Freelance • Systèmes/Réseaux/Cloud/Cybersécurité</span>
+					</p>
+					<!-- Sous-titre animé avec un effet machine à écrire -->
 
 					<!-- Utilisation de la balise <nav> pour regrouper les liens de navigation -->
 					<nav aria-label="Réseaux sociaux">
 						<ul>
 							<!-- Lien vers LinkedIn avec l'attribut aria-label pour améliorer l'accessibilité -->
 							<li><a href="https://www.linkedin.com/in/bodaine/" class="icon brands fa-linkedin" aria-label="LinkedIn"><span class="label">LinkedIn</span></a></li>
-						  
+
+							<!-- Lien vers le profil GitHub -->
+							<li><a href="https://github.com/NicoBOD" target="_blank" rel="noopener noreferrer" class="icon brands fa-github" aria-label="GitHub"><span class="label">GitHub</span></a></li>
+
 							<!-- Lien vers une adresse email, utilisant une icône en forme d'enveloppe -->
 							<li><a href="mailto:contact-nicolas-bodaine.okay540@aleeas.com" class="icon solid fa-envelope" aria-label="Email"><span class="label">Email</span></a></li>
 						</ul>
@@ -152,8 +163,11 @@
 
 				<!-- Utilisation de la balise <footer> pour le pied de page -->
 				<footer id="footer">
-					<span class="copyright"> Co-fondateur de l'association <a href="https://www.tutotech.org">TutoTech</a></span>
-					<!-- Texte de copyright : un '♥' est affiché, avec un lien vers le site TutoTech -->
+					<span class="copyright">
+						<span id="coeur" title="♥">♥</span>
+						Co-fondateur de l'association <a href="https://www.tutotech.org">TutoTech</a>
+						<a href="https://github.com/TutoTech" target="_blank" rel="noopener noreferrer" class="lien-github-footer" aria-label="GitHub de TutoTech"><i class="fab fa-github" aria-hidden="true"></i></a>
+					</span>
 				</footer>
 				<!-- Fin du pied de page -->
 
@@ -206,19 +220,14 @@
 			<!-- Insertion d'un script JavaScript -->
 
 			// La fonction ci-dessous s'exécute lorsque la page est entièrement chargée
-			window.onload = function() { 
-				document.body.classList.remove('is-preload'); 
+			window.onload = function() {
+				document.body.classList.remove('is-preload');
 			}
 			// Supprime la classe 'is-preload' du corps de la page pour permettre des animations ou des effets CSS
 
-			// La fonction ci-dessous désactive le défilement tactile
-			window.ontouchmove = function() { 
-				return false; 
-			}
-
 			// La fonction ci-dessous s'exécute lors d'un changement d'orientation sur les appareils mobiles
-			window.onorientationchange = function() { 
-				document.body.scrollTop = 0; 
+			window.onorientationchange = function() {
+				document.body.scrollTop = 0;
 			}
 			// Réinitialise le défilement de la page en haut lors d'un changement d'orientation sur les appareils mobiles
 		</script>
@@ -258,6 +267,85 @@ document.addEventListener("DOMContentLoaded", function() {
         localStorage.setItem('theme', sombre ? 'dark' : 'light');
         appliquerTheme(sombre);
     });
+
+    // Préférence d'accessibilité : réduire les animations
+    const reduireAnimations = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ----- Effet machine à écrire sur le sous-titre -----
+    const texteSousTitre = 'Formateur IT • Freelance • Systèmes/Réseaux/Cloud/Cybersécurité';
+    const texteTape = document.getElementById('texteTape');
+    const curseur = document.getElementById('curseur');
+
+    if (reduireAnimations) {
+        texteTape.textContent = texteSousTitre;
+        curseur.classList.add('fini');
+    } else {
+        let lettres = 0;
+        // Démarre après l'apparition du header (animation du template à 2,25 s)
+        setTimeout(function taper() {
+            texteTape.textContent = texteSousTitre.slice(0, ++lettres);
+            if (lettres < texteSousTitre.length) {
+                setTimeout(taper, 30 + Math.random() * 45);
+            } else {
+                // Le curseur clignote encore un peu puis s'efface
+                setTimeout(function() { curseur.classList.add('fini'); }, 2500);
+            }
+        }, 2600);
+    }
+
+    // ----- Parallaxe légère du contenu au mouvement de la souris (ordinateur uniquement) -----
+    if (!reduireAnimations && window.matchMedia('(pointer: fine)').matches) {
+        const main = document.getElementById('main');
+        let cibleX = 0, cibleY = 0, posX = 0, posY = 0;
+
+        window.addEventListener('mousemove', function(event) {
+            cibleX = event.clientX / window.innerWidth - 0.5;
+            cibleY = event.clientY / window.innerHeight - 0.5;
+        });
+
+        (function animerParallaxe() {
+            // Interpolation douce vers la position cible
+            posX += (cibleX - posX) * 0.05;
+            posY += (cibleY - posY) * 0.05;
+            main.style.transform = 'translate3d(' + (posX * -14).toFixed(2) + 'px, ' + (posY * -10).toFixed(2) + 'px, 0)';
+            requestAnimationFrame(animerParallaxe);
+        })();
+    }
+
+    // ----- Easter egg : 5 clics sur le cœur du footer -----
+    const coeur = document.getElementById('coeur');
+    let clicsCoeur = 0;
+
+    coeur.addEventListener('click', function() {
+        // Relance l'animation de battement à chaque clic
+        coeur.classList.remove('bat');
+        void coeur.offsetWidth;
+        coeur.classList.add('bat');
+
+        if (++clicsCoeur === 5) {
+            clicsCoeur = 0;
+            pluieDeCoeurs();
+            afficherToast('Merci pour tout cet amour ! ❤️');
+        }
+    });
+
+    // Fait pleuvoir des cœurs sur toute la largeur de l'écran
+    function pluieDeCoeurs() {
+        const couleurs = ['#ff5f7a', '#ff8fa3', '#ffc2d1', '#e63956'];
+        for (let i = 0; i < 45; i++) {
+            setTimeout(function() {
+                const c = document.createElement('span');
+                c.className = 'coeur-confetti';
+                c.textContent = '♥';
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.fontSize = (0.8 + Math.random() * 1.6) + 'em';
+                c.style.color = couleurs[Math.floor(Math.random() * couleurs.length)];
+                c.style.animationDuration = (2.5 + Math.random() * 2.5) + 's';
+                document.body.appendChild(c);
+                setTimeout(function() { c.remove(); }, 5200);
+            }, Math.random() * 1200);
+        }
+    }
 
     // Affiche le compte à rebours initial sur le bouton
     boutonFuyant.innerHTML = `<span id="ligne1">Cliquez ${clickCount} fois pour la surprise 🎁 </span><br><span id="ligne2">❌ REFUSER LES COOKIES </span>`;
