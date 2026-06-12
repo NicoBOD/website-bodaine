@@ -719,7 +719,8 @@ input, select, textarea {
 			font-weight: 300;
 			letter-spacing: 0.2em;
 			margin-bottom: 1.25em;
-			opacity: 0.6;
+			opacity: 0.9;
+			text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 			text-transform: uppercase;
 		}
 
@@ -744,10 +745,13 @@ input, select, textarea {
 			#projets .cartes-projets a {
 				-webkit-backdrop-filter: blur(6px);
 				backdrop-filter: blur(6px);
-				background: rgba(255, 255, 255, 0.08);
-				border: solid 1px rgba(255, 255, 255, 0.25);
+				/* Fond bleu nuit translucide : le texte reste lisible même quand
+				   la neige de l'image de fond passe derrière la carte */
+				background: rgba(13, 27, 38, 0.38);
+				border: solid 1px rgba(255, 255, 255, 0.28);
 				border-radius: 0.5em;
 				color: #fff;
+				text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
 				display: flex;
 				flex-direction: column;
 				align-items: center;
@@ -759,9 +763,9 @@ input, select, textarea {
 			}
 
 				#projets .cartes-projets a:hover {
-					background: rgba(255, 255, 255, 0.18);
+					background: rgba(13, 27, 38, 0.58);
 					border-color: var(--accent-clair);
-					box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+					box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 					transform: translateY(-4px);
 				}
 
@@ -784,7 +788,7 @@ input, select, textarea {
 					font-size: 0.8em;
 					line-height: 1.4em;
 					margin-top: 0.35em;
-					opacity: 0.7;
+					opacity: 0.9;
 				}
 
 /* Footer */
@@ -1376,22 +1380,33 @@ body.dark #bg {
 
 
 
-/* Animation de rebondissement */
+/* Animation de rebond façon dessin animé : le bouton s'écrase, s'étire, saute,
+   puis se tasse en retombant (« squash & stretch ») */
 @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
+    0% {
+        transform: scale(1, 1) translateY(0);
+    }
+    15% {
+        transform: scale(1.3, 0.6) translateY(5px);
     }
     40% {
-        transform: translateY(-30px);
+        transform: scale(0.85, 1.2) translateY(-28px);
     }
-    60% {
-        transform: translateY(-15px);
+    62% {
+        transform: scale(1.1, 0.85) translateY(0);
+    }
+    80% {
+        transform: scale(0.96, 1.05) translateY(-8px);
+    }
+    100% {
+        transform: scale(1, 1) translateY(0);
     }
 }
 
 /* Classe pour activer l'effet de rebondissement */
 .bounce {
-    animation: bounce 0.6s;
+    animation: bounce 0.6s ease;
+    transform-origin: center bottom;
 }
 
 
@@ -1426,8 +1441,8 @@ body.dark #bg {
 }
 
 /* Chaque confetti a deux couches :
-   - l'extérieur suit la trajectoire (éclat depuis le point d'origine, puis chute
-     avec dérive) pilotée par des variables CSS posées en JS ;
+   - l'extérieur est déplacé image par image par le petit moteur physique JS
+     (gravité, vent, souffle de la souris, rebonds sur les cartes) ;
    - l'intérieur tournoie sur un axe 3D aléatoire, comme un vrai bout de papier. */
 .confetti {
     position: absolute;
@@ -1435,26 +1450,6 @@ body.dark #bg {
     left: 0;
     pointer-events: none;
     will-change: transform;
-    animation: chute-confetti 4s cubic-bezier(0.25, 0.45, 0.6, 1) forwards;
-}
-
-@keyframes chute-confetti {
-    0% {
-        transform: translate3d(var(--x0, 0px), var(--y0, 0px), 0);
-        opacity: 1;
-    }
-    /* L'éclat initial : le confetti est projeté hors du point d'origine */
-    12% {
-        transform: translate3d(calc(var(--x0, 0px) + var(--bx, 0px)), calc(var(--y0, 0px) + var(--by, 0px)), 0);
-        opacity: 1;
-    }
-    85% {
-        opacity: 1;
-    }
-    100% {
-        transform: translate3d(calc(var(--x0, 0px) + var(--dx, 0px)), 110vh, 0);
-        opacity: 0;
-    }
 }
 
 .confetti-interieur {
@@ -1626,18 +1621,15 @@ body.dark #bg {
     display: block;
     width: min(650px, 90vw); /* Taille du nuage, bornée sur les petits écrans */
     height: auto; /* Conserver les proportions de l'image */
-    cursor: pointer;
+    /* Le nuage est purement décoratif : il ne doit surtout pas intercepter
+       les clics destinés aux icônes (LinkedIn, GitHub, e-mail) qu'il recouvre */
+    pointer-events: none;
     transition: opacity 1s ease, transform 1s ease; /* Ajoute une transition par défaut */
 }
 
 #cloudContainer img {
     width: 100%; /* Assure que l'image s'adapte à la taille définie */
     height: auto; /* Conserve les proportions de l'image */
-    transition: transform 0.3s ease; /* Ajoute un léger effet de transition */
-}
-
-#cloudContainer:hover img {
-    transform: scale(1.1); /* Agrandit l'image de 10% au survol */
 }
 
 /* ---- Message temporaire (toast) affiché en bas de l'écran ---- */
@@ -2294,5 +2286,24 @@ body.glitch #wrapper {
 
     #bsod-overlay .bsod-contenu {
         padding: 8vh 6vw 2em;
+    }
+}
+
+/* ---- Le nom brille comme un soleil une fois le menu secret révélé ---- */
+
+#nom.soleil {
+    color: #ffd700;
+    animation: rayonnement 2.5s ease-in-out infinite;
+}
+
+@keyframes rayonnement {
+    0%, 100% {
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.6),
+                     0 0 30px rgba(255, 200, 80, 0.35);
+    }
+    50% {
+        text-shadow: 0 0 18px rgba(255, 215, 0, 0.95),
+                     0 0 50px rgba(255, 200, 80, 0.7),
+                     0 0 85px rgba(255, 180, 60, 0.45);
     }
 }
