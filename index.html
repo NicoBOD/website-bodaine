@@ -224,21 +224,21 @@
         <!-- Blague : faux piratage (inoffensif, tout revient à la normale en actualisant la page) -->
         <li>
             <a href="#" id="lien-piratage">
-                <i class="fas fa-skull-crossbones" aria-hidden="true"></i> Se faire pirater 😈
+                <i class="fas fa-skull-crossbones" aria-hidden="true"></i> Se faire pirater
             </a>
         </li>
 
         <!-- Blague : faux écran bleu Windows (inoffensif lui aussi) -->
         <li>
             <a href="#" id="lien-bsod">
-                <i class="fas fa-desktop" aria-hidden="true"></i> Crasher Windows 💙
+                <i class="fas fa-desktop" aria-hidden="true"></i> Crasher Windows
             </a>
         </li>
 
         <!-- Pour rejouer la pluie de confettis à volonté -->
         <li>
             <a href="#" id="lien-confettis">
-                <i class="fas fa-birthday-cake" aria-hidden="true"></i> Confettis ! 🎉
+                <i class="fas fa-birthday-cake" aria-hidden="true"></i> Confettis !
             </a>
         </li>
 
@@ -676,12 +676,15 @@ document.addEventListener("DOMContentLoaded", function() {
             const ctx = contexteAudioPartage;
             const t = ctx.currentTime;
 
-            // Le « pop » : une sinusoïde qui plonge dans les graves
+            // Le « pop » : une sinusoïde qui plonge dans les graves.
+            // Sa hauteur monte avec le nombre de confettis à l'écran :
+            // plus la fête bat son plein, plus le canon est aigu.
+            const hauteur = 380 + Math.min(confettisActifs.size, 220) * 2.2;
             const oscillateur = ctx.createOscillator();
             const gain = ctx.createGain();
             oscillateur.type = 'sine';
-            oscillateur.frequency.setValueAtTime(520, t);
-            oscillateur.frequency.exponentialRampToValueAtTime(70, t + 0.13);
+            oscillateur.frequency.setValueAtTime(hauteur, t);
+            oscillateur.frequency.exponentialRampToValueAtTime(Math.max(50, hauteur / 7), t + 0.13);
             gain.gain.setValueAtTime(0.3, t);
             gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
             oscillateur.connect(gain);
@@ -1013,6 +1016,26 @@ document.addEventListener("DOMContentLoaded", function() {
     const piratageRancon = document.getElementById('piratage-rancon');
     let piratageEnCours = false;
 
+    // Le plein écran rend les blagues plus crédibles. La demande peut être refusée
+    // par le navigateur : dans ce cas la blague continue simplement en fenêtré.
+    function passerEnPleinEcran() {
+        const racine = document.documentElement;
+        try {
+            const promesse = racine.requestFullscreen ? racine.requestFullscreen()
+                : (racine.webkitRequestFullscreen ? racine.webkitRequestFullscreen() : null);
+            if (promesse && promesse.catch) promesse.catch(function() {});
+        } catch (erreur) { /* tant pis pour le plein écran */ }
+    }
+
+    function quitterPleinEcran() {
+        try {
+            if (document.fullscreenElement && document.exitFullscreen) {
+                const promesse = document.exitFullscreen();
+                if (promesse && promesse.catch) promesse.catch(function() {});
+            }
+        } catch (erreur) { /* déjà sorti */ }
+    }
+
     const lignesPiratage = [
         '> Initialisation de l\'attaque... OK',
         '> Connexion au serveur de bodaine.fr... OK',
@@ -1032,6 +1055,9 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
         if (piratageEnCours) return;
         piratageEnCours = true;
+
+        // Plein écran (autorisé ici car déclenché par le clic du visiteur)
+        passerEnPleinEcran();
 
         // Étape 1 : le site part en vrille pendant un court instant
         document.body.classList.add('glitch');
@@ -1153,6 +1179,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Le bouton « Tout récupérer » fait la même chose que le bouton Actualiser du navigateur
     document.getElementById('rancon-recuperer').addEventListener('click', function() {
+        quitterPleinEcran();
         window.location.reload();
     });
 
@@ -1165,6 +1192,8 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
         if (bsodOverlay.classList.contains('visible')) return;
 
+        // Un vrai écran bleu prend tout l'écran : le nôtre aussi
+        passerEnPleinEcran();
         dessinerFauxQR();
         bsodOverlay.classList.add('visible');
 
@@ -1184,7 +1213,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Une fois les « 100% » atteints, un clic n'importe où rend son PC au visiteur
     bsodOverlay.addEventListener('click', function() {
-        if (bsodTermine) window.location.reload();
+        if (bsodTermine) {
+            quitterPleinEcran();
+            window.location.reload();
+        }
     });
 
     // Un faux QR code décoratif (motif aléatoire + carrés de repérage, comme un vrai)
