@@ -235,6 +235,13 @@
             </a>
         </li>
 
+        <!-- Pour rejouer la pluie de confettis à volonté -->
+        <li>
+            <a href="#" id="lien-confettis">
+                <i class="fas fa-birthday-cake" aria-hidden="true"></i> Confettis ! 🎉
+            </a>
+        </li>
+
         <!-- Groupe : services cloud éthiques (liens affiliés Infomaniak) -->
         <li class="groupe">
             <span class="titre-groupe"><i class="fas fa-cloud" aria-hidden="true"></i> Services cloud éthiques <small>(liens affiliés)</small></span>
@@ -492,32 +499,43 @@ document.addEventListener("DOMContentLoaded", function() {
 
     window.addEventListener('mousemove', deplacerBouton);
 
-    // ----- Confettis : explosion depuis le bouton, puis pluie de papillons -----
-    // Chaque confetti est composé de deux éléments : l'extérieur gère la trajectoire
-    // (éclat puis chute, via des variables CSS), l'intérieur gère le papillonnement
+    // ----- Confettis : petit moteur physique (gravité, vent, souris, rebonds) -----
+    // Chaque confetti est composé de deux éléments : l'extérieur est déplacé image
+    // par image par la boucle physique ci-dessous, l'intérieur gère le papillonnement
     // 3D qui donne l'illusion d'un vrai bout de papier qui virevolte.
     const couleursConfettis = ['#f2a65a', '#ffc98b', '#ffd166', '#6bd5e1', '#5aa9d6', '#ef6f6c', '#9bf6af', '#f5f7fa'];
     // Un confetti sur dix est un cookie : c'est quand même lui le héros de la blague
     const formesConfettis = ['carre', 'carre', 'rectangle', 'rectangle', 'rond', 'rond', 'serpentin', 'serpentin', 'carre', 'cookie'];
+    const confettisActifs = new Set();
+    let bouclePhysiqueActive = false;
+    let rectsCartes = [];
+    let sourisPhysX = -9999;
+    let sourisPhysY = -9999;
 
-    function creerConfetti(xDepart, yDepart, eclatX, eclatY) {
+    // Position de la souris : les confettis proches sont soufflés à son passage
+    if (window.matchMedia('(pointer: fine)').matches) {
+        window.addEventListener('mousemove', function(event) {
+            sourisPhysX = event.clientX;
+            sourisPhysY = event.clientY;
+        });
+    }
+
+    // Les confettis rebondissent sur le bord supérieur des cartes projets
+    function rafraichirRectsCartes() {
+        rectsCartes = Array.from(document.querySelectorAll('#projets .cartes-projets a'))
+            .map(function(carte) { return carte.getBoundingClientRect(); });
+    }
+    window.addEventListener('resize', function() { rectsCartes = []; });
+
+    function creerConfetti(x, y, vx, vy) {
         if (reduireAnimations) return;
         // Garde-fou : on plafonne le nombre de confettis simultanés
-        if (confettiContainer.childElementCount > 220) return;
+        if (confettisActifs.size > 220) return;
 
         const exterieur = document.createElement('span');
         const interieur = document.createElement('span');
         exterieur.className = 'confetti ' + formesConfettis[Math.floor(Math.random() * formesConfettis.length)];
         interieur.className = 'confetti-interieur';
-
-        // Trajectoire : position de départ, poussée de l'éclat, dérive pendant la chute
-        const derive = (eclatX || 0) + (Math.random() * 240 - 120);
-        exterieur.style.setProperty('--x0', xDepart.toFixed(0) + 'px');
-        exterieur.style.setProperty('--y0', yDepart.toFixed(0) + 'px');
-        exterieur.style.setProperty('--bx', (eclatX || 0).toFixed(0) + 'px');
-        exterieur.style.setProperty('--by', (eclatY || 0).toFixed(0) + 'px');
-        exterieur.style.setProperty('--dx', derive.toFixed(0) + 'px');
-        exterieur.style.animationDuration = (3 + Math.random() * 3).toFixed(2) + 's';
 
         // Apparence : taille, couleur et axe de rotation propres à chaque confetti
         const taille = 6 + Math.random() * 7;
@@ -543,24 +561,149 @@ document.addEventListener("DOMContentLoaded", function() {
         interieur.style.animationDuration = (0.55 + Math.random() * 0.9).toFixed(2) + 's';
 
         exterieur.appendChild(interieur);
+        exterieur.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
         confettiContainer.appendChild(exterieur);
 
-        // Nettoyage une fois la chute terminée
-        setTimeout(function() { exterieur.remove(); }, 6500);
+        confettisActifs.add({
+            el: exterieur,
+            x: x, y: y, vx: vx || 0, vy: vy || 0,
+            poids: 0.75 + Math.random() * 0.5,        // les confettis ne tombent pas tous à la même vitesse
+            phase: Math.random() * Math.PI * 2,        // déphasage du flottement propre à chacun
+            repos: 0                                   // > 0 quand il s'est posé sur une carte
+        });
+        demarrerPhysique();
+    }
+
+    function retirerConfetti(p) {
+        p.el.remove();
+        confettisActifs.delete(p);
+    }
+
+    // La boucle physique ne tourne que lorsqu'il y a des confettis à animer
+    function demarrerPhysique() {
+        if (bouclePhysiqueActive) return;
+        bouclePhysiqueActive = true;
+        if (rectsCartes.length === 0) rafraichirRectsCartes();
+        let tempsPrecedent = performance.now();
+
+        requestAnimationFrame(function pas(maintenant) {
+            const dt = Math.min(0.05, (maintenant - tempsPrecedent) / 1000);
+            tempsPrecedent = maintenant;
+            const brise = Math.sin(maintenant / 1800) * 22; // vent global qui change doucement de sens
+
+            confettisActifs.forEach(function(p) {
+                // Posé sur une carte : il s'efface puis disparaît
+                if (p.repos > 0) {
+                    p.repos -= dt;
+                    if (p.repos <= 0) retirerConfetti(p);
+                    return;
+                }
+
+                // Gravité freinée par l'air + brise + flottement propre au confetti
+                p.vy += (300 * p.poids - p.vy * 0.9) * dt;
+                p.vx += (brise + Math.sin(maintenant / 300 + p.phase) * 35 - p.vx * 1.2) * dt;
+
+                // Le passage de la souris souffle les confettis proches
+                const dxSouris = p.x - sourisPhysX;
+                const dySouris = p.y - sourisPhysY;
+                const distSouris = Math.hypot(dxSouris, dySouris);
+                if (distSouris < 90 && distSouris > 1) {
+                    const souffle = (90 - distSouris) * 50 * dt;
+                    p.vx += (dxSouris / distSouris) * souffle;
+                    p.vy += (dySouris / distSouris) * souffle;
+                }
+
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+
+                // Rebond léger sur le haut des cartes projets
+                if (p.vy > 0) {
+                    for (let i = 0; i < rectsCartes.length; i++) {
+                        const r = rectsCartes[i];
+                        if (p.x > r.left && p.x < r.right && p.y > r.top && p.y < r.top + 14) {
+                            p.vy = -p.vy * 0.3;
+                            p.vx *= 0.5;
+                            if (Math.abs(p.vy) < 30) {
+                                // Trop peu d'élan : il se pose sur la carte et s'efface
+                                p.vy = 0;
+                                p.repos = 1.8;
+                                p.el.style.transition = 'opacity 1.6s ease';
+                                p.el.style.opacity = '0';
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if (p.y > window.innerHeight + 40) {
+                    retirerConfetti(p);
+                    return;
+                }
+                p.el.style.transform = 'translate3d(' + p.x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px,0)';
+            });
+
+            if (confettisActifs.size > 0) {
+                requestAnimationFrame(pas);
+            } else {
+                bouclePhysiqueActive = false;
+            }
+        });
     }
 
     // Pluie : un confetti qui part du haut de l'écran (utilisée aussi par le code Konami)
     function createConfetti() {
-        creerConfetti(Math.random() * window.innerWidth, -20, 0, 0);
+        creerConfetti(Math.random() * window.innerWidth, -20, Math.random() * 80 - 40, 40 + Math.random() * 90);
     }
 
     // Explosion : une gerbe radiale depuis un point (le bouton à cookies, par exemple)
     function explosionConfettis(x, y, nombre) {
         for (let i = 0; i < nombre; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const force = 60 + Math.random() * 170;
+            const force = 120 + Math.random() * 360;
             // Légère poussée vers le haut pour un vrai effet « canon à confettis »
-            creerConfetti(x, y, Math.cos(angle) * force, Math.sin(angle) * force * 0.7 - 90);
+            creerConfetti(x, y, Math.cos(angle) * force, Math.sin(angle) * force * 0.6 - 230);
+        }
+    }
+
+    // ----- « Pop » de canon à confettis, synthétisé avec l'API WebAudio -----
+    let contexteAudioPartage = null;
+
+    function jouerPop() {
+        try {
+            if (!contexteAudioPartage) {
+                contexteAudioPartage = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const ctx = contexteAudioPartage;
+            const t = ctx.currentTime;
+
+            // Le « pop » : une sinusoïde qui plonge dans les graves
+            const oscillateur = ctx.createOscillator();
+            const gain = ctx.createGain();
+            oscillateur.type = 'sine';
+            oscillateur.frequency.setValueAtTime(520, t);
+            oscillateur.frequency.exponentialRampToValueAtTime(70, t + 0.13);
+            gain.gain.setValueAtTime(0.3, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+            oscillateur.connect(gain);
+            gain.connect(ctx.destination);
+            oscillateur.start(t);
+            oscillateur.stop(t + 0.17);
+
+            // Le souffle de papier : un très bref bruit blanc qui s'éteint
+            const tampon = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.07), ctx.sampleRate);
+            const donnees = tampon.getChannelData(0);
+            for (let i = 0; i < donnees.length; i++) {
+                donnees[i] = (Math.random() * 2 - 1) * (1 - i / donnees.length);
+            }
+            const bruit = ctx.createBufferSource();
+            bruit.buffer = tampon;
+            const gainBruit = ctx.createGain();
+            gainBruit.gain.value = 0.1;
+            bruit.connect(gainBruit);
+            gainBruit.connect(ctx.destination);
+            bruit.start(t);
+        } catch (erreur) {
+            // Pas d'audio ? Les confettis se passent très bien de bande-son.
         }
     }
 
@@ -602,9 +745,14 @@ document.addEventListener("DOMContentLoaded", function() {
             boutonFuyant.classList.remove('bounce');
         }, 600);
 
-        // Chaque clic fait exploser une gerbe de confettis depuis le bouton lui-même
+        // Chaque clic fait exploser une gerbe de confettis depuis le bouton lui-même,
+        // avec le « pop » du canon et une petite vibration sur mobile
         const rectBouton = boutonFuyant.getBoundingClientRect();
         explosionConfettis(rectBouton.left + rectBouton.width / 2, rectBouton.top + rectBouton.height / 2, 50);
+        jouerPop();
+        if (navigator.vibrate) {
+            navigator.vibrate(clickCount === 0 ? [60, 50, 150] : 40);
+        }
 
         // Met à jour le texte du bouton avec le nouveau compteur
         if (clickCount > 1) {
@@ -646,9 +794,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const menuButton = document.getElementById('menuButton');
     const menuContent = document.getElementById('menuContent');
 
-    // Révèle le panneau du menu secret avec une animation d'apparition (gérée en CSS)
+    // Révèle le panneau du menu secret avec une animation d'apparition (gérée en CSS).
+    // Le nom se met aussi à briller comme un soleil pour fêter ça.
     function afficherMenuSecret() {
         menuSecret.classList.add('visible');
+        document.getElementById('nom').classList.add('soleil');
     }
 
     // Ouvre / referme le contenu du menu avec une transition fluide sur la hauteur réelle
@@ -834,6 +984,25 @@ document.addEventListener("DOMContentLoaded", function() {
     // Un clic sur le fond assombri ferme aussi le quiz
     quizOverlay.addEventListener('click', function(event) {
         if (event.target === quizOverlay) fermerQuiz();
+    });
+
+    // ----- Entrée « Confettis ! » du menu secret : rejouer la pluie à volonté -----
+    let pluieFestiveEnCours = false;
+
+    document.getElementById('lien-confettis').addEventListener('click', function(event) {
+        event.preventDefault();
+        if (pluieFestiveEnCours) return;
+        pluieFestiveEnCours = true;
+        jouerPop();
+        if (navigator.vibrate) navigator.vibrate(40);
+        const pluie = setInterval(function() {
+            createConfetti();
+            createConfetti();
+        }, 90);
+        setTimeout(function() {
+            clearInterval(pluie);
+            pluieFestiveEnCours = false;
+        }, 4000);
     });
 
     // ----- Blague du menu secret : « Se faire pirater » -----
