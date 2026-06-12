@@ -315,6 +315,24 @@
 			</div>
 		</div>
 
+		<!-- Faux écran de démarrage BIOS, affiché uniquement à la première visite -->
+		<div id="bios-overlay">
+			<pre id="bios-texte"></pre>
+			<p class="bios-skip">Cliquez n'importe où pour passer</p>
+		</div>
+
+		<!-- Faux assistant trombone, qui surgit au bout de 45 secondes avec des conseils absurdes -->
+		<div id="trombone" role="dialog" aria-label="Assistant trombone">
+			<div class="trombone-bulle">
+				<p id="trombone-message"></p>
+				<div class="trombone-boutons">
+					<button type="button" id="trombone-autre">Un autre conseil !</button>
+					<button type="button" id="trombone-fermer">Non merci</button>
+				</div>
+			</div>
+			<span class="trombone-corps" aria-hidden="true">📎</span>
+		</div>
+
 		<!-- Mini-jeu caché : quiz réseau (tapez « quiz » ou faites deux fois le code Konami) -->
 		<div id="quiz-overlay">
 			<div id="quiz-panneau" role="dialog" aria-modal="true" aria-labelledby="quiz-titre">
@@ -383,6 +401,115 @@ document.addEventListener("DOMContentLoaded", function() {
     // Préférence d'accessibilité : réduire les animations
     const reduireAnimations = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    // ----- Faux écran de démarrage BIOS (première visite uniquement) -----
+    const biosOverlay = document.getElementById('bios-overlay');
+    let biosDejaVu = false;
+    try { biosDejaVu = localStorage.getItem('biosVu') === 'oui'; } catch (erreur) {}
+
+    if (!biosDejaVu && !reduireAnimations) {
+        try { localStorage.setItem('biosVu', 'oui'); } catch (erreur) {}
+        biosOverlay.classList.add('visible');
+
+        const lignesBios = [
+            'TutoTech BIOS v2.6 — propriété de Nicolas BODAINE',
+            'Processeur : Formateur IT cadencé à 3,14 GHz ............ OK',
+            'Mémoire : 640 Ko (ça devrait suffire pour tout le monde) . OK',
+            'Souris détectée : préparez-vous à cliquer ............... OK',
+            'Humour : chargé ......................................... OK',
+            '',
+            'Démarrage de bodaine.fr ...'
+        ];
+        const biosTexte = document.getElementById('bios-texte');
+        let ligneBios = 0;
+        let caractereBios = 0;
+        let biosFini = false;
+
+        function fermerBios() {
+            if (biosFini) return;
+            biosFini = true;
+            biosOverlay.classList.add('disparait');
+            setTimeout(function() { biosOverlay.remove(); }, 700);
+        }
+
+        (function taperBios() {
+            if (biosFini) return;
+            if (ligneBios >= lignesBios.length) {
+                setTimeout(fermerBios, 700);
+                return;
+            }
+            const ligne = lignesBios[ligneBios];
+            if (caractereBios < ligne.length) {
+                // Par paquets de 3 caractères : assez rapide pour rester sous les 2 secondes
+                biosTexte.textContent += ligne.slice(caractereBios, caractereBios + 3);
+                caractereBios += 3;
+                setTimeout(taperBios, 8);
+            } else {
+                biosTexte.textContent += '\n';
+                ligneBios++;
+                caractereBios = 0;
+                setTimeout(taperBios, 120);
+            }
+        })();
+
+        biosOverlay.addEventListener('pointerdown', fermerBios);
+    } else if (biosOverlay) {
+        biosOverlay.remove();
+    }
+
+    // ----- Titre d'onglet : le site boude quand on l'abandonne -----
+    const titreOriginal = document.title;
+    document.addEventListener('visibilitychange', function() {
+        document.title = document.hidden ? '😢 Reviens, il reste des easter eggs !' : titreOriginal;
+    });
+
+    // ----- Traînée d'étoiles derrière le curseur (ordinateurs uniquement) -----
+    if (!reduireAnimations && window.matchMedia('(pointer: fine)').matches) {
+        let derniereEtoile = 0;
+        window.addEventListener('mousemove', function(event) {
+            const maintenant = performance.now();
+            if (maintenant - derniereEtoile < 45) return; // limite le débit de création
+            derniereEtoile = maintenant;
+            if (document.querySelectorAll('.etoile-curseur').length > 40) return;
+
+            const etoile = document.createElement('span');
+            etoile.className = 'etoile-curseur';
+            etoile.textContent = '✦';
+            etoile.style.left = (event.clientX + (Math.random() * 14 - 7)).toFixed(0) + 'px';
+            etoile.style.top = (event.clientY + (Math.random() * 14 - 7)).toFixed(0) + 'px';
+            etoile.style.fontSize = (5 + Math.random() * 9).toFixed(0) + 'px';
+            etoile.style.color = Math.random() < 0.5 ? '#ffc98b' : '#ffffff';
+            document.body.appendChild(etoile);
+            setTimeout(function() { etoile.remove(); }, 850);
+        });
+    }
+
+    // ----- Faux assistant trombone : des conseils parfaitement inutiles -----
+    const conseilsTrombone = [
+        'On dirait que vous lisez un site web. Voulez-vous de l\'aide pour cliquer sur des liens ?',
+        'Astuce : le bouton qui fuit arrête de fuir si vous l\'attrapez.',
+        'Saviez-vous ? 100 % des gagnants du quiz réseau ont tenté leur chance.',
+        'Conseil de pro : il paraît que taper certains mots magiques au clavier fait des miracles…',
+        'Pour refuser les cookies, cliquez trois fois. C\'est la procédure officielle RGPD*. (*pas du tout)',
+        'J\'ai connu Word 97. Vous, vous avez de la chance : ce site est bien plus drôle.'
+    ];
+    const trombone = document.getElementById('trombone');
+    const tromboneMessage = document.getElementById('trombone-message');
+    let indexConseil = 0;
+
+    setTimeout(function() {
+        tromboneMessage.textContent = conseilsTrombone[0];
+        trombone.classList.add('visible');
+    }, 45000);
+
+    document.getElementById('trombone-autre').addEventListener('click', function() {
+        indexConseil = (indexConseil + 1) % conseilsTrombone.length;
+        tromboneMessage.textContent = conseilsTrombone[indexConseil];
+    });
+
+    document.getElementById('trombone-fermer').addEventListener('click', function() {
+        trombone.classList.remove('visible');
+    });
+
     // ----- Effet machine à écrire sur le sous-titre -----
     const texteSousTitre = 'Formateur IT • Freelance • Systèmes/Réseaux/Cloud/Cybersécurité';
     const texteTape = document.getElementById('texteTape');
@@ -438,6 +565,7 @@ document.addEventListener("DOMContentLoaded", function() {
             clicsCoeur = 0;
             pluieDeCoeurs();
             afficherToast('Merci pour tout cet amour ! ❤️');
+            debloquerSucces('coeur');
         }
     });
 
@@ -772,7 +900,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 afficherMenuSecret(); // Appeler la fonction pour afficher le menu secret
             }, 500);
 
-            // Grand final : une pluie dense de confettis pendant que le menu apparaît
+            // Grand final : fanfare et pluie dense de confettis pendant que le menu apparaît
+            jouerFanfare();
             confettiInterval = setInterval(() => {
                 createConfetti();
                 createConfetti();
@@ -802,6 +931,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function afficherMenuSecret() {
         menuSecret.classList.add('visible');
         document.getElementById('nom').classList.add('soleil');
+        debloquerSucces('menu-secret');
     }
 
     // Ouvre / referme le contenu du menu avec une transition fluide sur la hauteur réelle
@@ -845,6 +975,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Pluie de confettis + nom en arc-en-ciel pendant quelques secondes
     function modeFete() {
+        debloquerSucces('konami');
         const nom = document.getElementById('nom');
         nom.classList.add('arc-en-ciel');
         for (let i = 0; i < 200; i++) {
@@ -854,7 +985,7 @@ document.addEventListener("DOMContentLoaded", function() {
         setTimeout(function() { nom.classList.remove('arc-en-ciel'); }, 8000);
     }
 
-    // ----- Easter eggs au clavier : tapez « quiz » ou « matrix » -----
+    // ----- Easter eggs au clavier : tapez « quiz », « matrix » ou « gravite » -----
     let tamponClavier = '';
     document.addEventListener('keydown', function(event) {
         if (event.key.length !== 1) return;
@@ -865,8 +996,77 @@ document.addEventListener("DOMContentLoaded", function() {
         } else if (tamponClavier.endsWith('matrix')) {
             tamponClavier = '';
             basculerModeCRT();
+        } else if (tamponClavier.endsWith('gravite')) {
+            tamponClavier = '';
+            modeGravite();
         }
     });
+
+    // ----- Easter egg : mode gravité (tapez « gravite ») -----
+    // Tous les éléments de la page tombent et rebondissent sur le bas de l'écran,
+    // puis reviennent sagement à leur place. Purement visuel, rien n'est cassé.
+    let graviteEnCours = false;
+
+    function modeGravite() {
+        if (graviteEnCours || reduireAnimations) return;
+        graviteEnCours = true;
+        debloquerSucces('gravite');
+        afficherToast('🪂 Oups… quelqu\'un a réactivé la gravité !');
+
+        const elements = Array.from(document.querySelectorAll(
+            '#nom, #sousTitre, #header nav li, #projets h2, #projets .cartes-projets li'
+        ));
+        const objets = elements.map(function(el) {
+            const rect = el.getBoundingClientRect();
+            return {
+                el: el,
+                x: 0, y: 0,
+                vx: Math.random() * 120 - 60,
+                vy: 40 + Math.random() * 160,
+                rot: 0,
+                vrot: Math.random() * 140 - 70,
+                sol: Math.max(0, window.innerHeight - rect.bottom) // distance jusqu'au bas de l'écran
+            };
+        });
+        elements.forEach(function(el) { el.style.transition = 'none'; });
+
+        let tempsPrecedent = performance.now();
+        let dureeChute = 0;
+
+        requestAnimationFrame(function pas(maintenant) {
+            const dt = Math.min(0.05, (maintenant - tempsPrecedent) / 1000);
+            tempsPrecedent = maintenant;
+            dureeChute += dt;
+
+            objets.forEach(function(o) {
+                o.vy += 1500 * dt; // gravité
+                o.x += o.vx * dt;
+                o.y += o.vy * dt;
+                o.rot += o.vrot * dt;
+                if (o.y > o.sol) { // rebond sur le bas de l'écran
+                    o.y = o.sol;
+                    o.vy = -o.vy * 0.45;
+                    o.vx *= 0.8;
+                    o.vrot *= 0.7;
+                }
+                o.el.style.transform = 'translate(' + o.x.toFixed(1) + 'px,' + o.y.toFixed(1) + 'px) rotate(' + o.rot.toFixed(1) + 'deg)';
+            });
+
+            if (dureeChute < 3.5) {
+                requestAnimationFrame(pas);
+            } else {
+                // Tout remonte en place avec un petit effet de ressort
+                objets.forEach(function(o) {
+                    o.el.style.transition = 'transform 1.2s cubic-bezier(0.22, 1.2, 0.36, 1)';
+                    o.el.style.transform = '';
+                });
+                setTimeout(function() {
+                    objets.forEach(function(o) { o.el.style.transition = ''; });
+                    graviteEnCours = false;
+                }, 1400);
+            }
+        });
+    }
 
     // La touche Échap ferme le quiz, sinon quitte le mode terminal rétro
     document.addEventListener('keydown', function(event) {
@@ -881,6 +1081,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // ----- Mode terminal rétro (CRT vert phosphore), déclenché par « matrix » -----
     function basculerModeCRT() {
         const actif = document.body.classList.toggle('crt');
+        if (actif) debloquerSucces('matrix');
         afficherToast(actif
             ? '📟 Mode terminal rétro activé — retapez « matrix » (ou Échap) pour quitter'
             : '🌈 Retour en couleurs !');
@@ -908,6 +1109,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let scoreQuiz = 0;
 
     function ouvrirQuiz() {
+        debloquerSucces('quiz');
         indexQuestion = 0;
         scoreQuiz = 0;
         quizOverlay.classList.add('visible');
@@ -1055,6 +1257,7 @@ document.addEventListener("DOMContentLoaded", function() {
         event.preventDefault();
         if (piratageEnCours) return;
         piratageEnCours = true;
+        debloquerSucces('piratage');
 
         // Plein écran (autorisé ici car déclenché par le clic du visiteur)
         passerEnPleinEcran();
@@ -1191,6 +1394,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('lien-bsod').addEventListener('click', function(event) {
         event.preventDefault();
         if (bsodOverlay.classList.contains('visible')) return;
+        debloquerSucces('bsod');
 
         // Un vrai écran bleu prend tout l'écran : le nôtre aussi
         passerEnPleinEcran();
@@ -1274,11 +1478,76 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 800);
     }
 
-    // Petit message temporaire en bas de l'écran
+    // ----- Fanfare de victoire, synthétisée en WebAudio (deux cuivres désaccordés) -----
+    function jouerFanfare() {
+        try {
+            if (!contexteAudioPartage) {
+                contexteAudioPartage = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const ctx = contexteAudioPartage;
+            const t = ctx.currentTime;
+            // Ta - da - da - DAAA ! (sol, do, mi, sol aigu)
+            const notes = [[392, 0, 0.16], [523.25, 0.18, 0.16], [659.25, 0.36, 0.16], [783.99, 0.54, 0.7]];
+            notes.forEach(function(note) {
+                [0, 6].forEach(function(desaccord) { // deux oscillateurs presque à l'unisson = son cuivré
+                    const oscillateur = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    oscillateur.type = 'sawtooth';
+                    oscillateur.frequency.value = note[0];
+                    oscillateur.detune.value = desaccord;
+                    gain.gain.setValueAtTime(0.0001, t + note[1]);
+                    gain.gain.exponentialRampToValueAtTime(0.08, t + note[1] + 0.03);
+                    gain.gain.setValueAtTime(0.08, t + note[1] + note[2] * 0.7);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, t + note[1] + note[2]);
+                    oscillateur.connect(gain);
+                    gain.connect(ctx.destination);
+                    oscillateur.start(t + note[1]);
+                    oscillateur.stop(t + note[1] + note[2] + 0.05);
+                });
+            });
+        } catch (erreur) {
+            // Pas d'audio ? La fête est belle quand même.
+        }
+    }
+
+    // ----- Succès débloqués : chaque easter egg découvert compte -----
+    const listeSucces = {
+        'menu-secret': 'Chasseur de cookies — menu secret révélé',
+        'konami': 'Old-school gamer — code Konami',
+        'quiz': 'Étudiant studieux — quiz réseau lancé',
+        'matrix': 'Voyageur temporel — mode terminal rétro',
+        'coeur': 'Cœur d\'artichaut — pluie de cœurs',
+        'piratage': 'Victime consentante — faux piratage subi',
+        'bsod': 'Écran bleu de la joie — faux crash Windows',
+        'gravite': 'Newton approuve — gravité réactivée'
+    };
+    let succesDebloques = [];
+    try { succesDebloques = JSON.parse(localStorage.getItem('succesDebloques')) || []; } catch (erreur) {}
+
+    function debloquerSucces(cle) {
+        if (succesDebloques.indexOf(cle) !== -1) return;
+        succesDebloques.push(cle);
+        try { localStorage.setItem('succesDebloques', JSON.stringify(succesDebloques)); } catch (erreur) {}
+        const total = Object.keys(listeSucces).length;
+        // Légèrement différé pour ne pas se superposer au toast de l'easter egg lui-même
+        setTimeout(function() {
+            afficherToast('🏆 Succès débloqué : ' + listeSucces[cle] + ' (' + succesDebloques.length + '/' + total + ')');
+            if (succesDebloques.length === total) {
+                setTimeout(function() {
+                    afficherToast('👑 Collection complète : vous avez TOUT trouvé. Chapeau bas !');
+                    explosionConfettis(window.innerWidth / 2, window.innerHeight / 3, 120);
+                    jouerFanfare();
+                }, 1800);
+            }
+        }, 800);
+    }
+
+    // Petit message temporaire en bas de l'écran (les toasts simultanés s'empilent)
     function afficherToast(message) {
         const toast = document.createElement('div');
         toast.className = 'toast';
         toast.textContent = message;
+        toast.style.bottom = (2 + document.querySelectorAll('.toast').length * 3.2) + 'em';
         document.body.appendChild(toast);
         requestAnimationFrame(function() { toast.classList.add('show'); });
         setTimeout(function() {
